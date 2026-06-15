@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import loginBackground from '../../assets/login-bg.png';
 import { Form, Input, Checkbox, Button } from 'antd';
 import './Login.css';
@@ -9,8 +10,11 @@ interface FieldType {
 }
 
 function Login() {
+    const navigate = useNavigate();
+
     const onFinish = (values: any) => {
         console.log('Success:', values);
+        navigate("/KnowledgeBaseList")
     };
 
     const onFinishFailed = (errorInfo: any) => {
