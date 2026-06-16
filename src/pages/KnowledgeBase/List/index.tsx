@@ -1,59 +1,12 @@
-import { Button, Table, Space, Form } from "antd";
-import { Route, BrowserRouter, useNavigate, Routes, Outlet } from "react-router-dom";
+import { Button, Table, Space, Form, Tabs } from "antd";
+import {useNavigate} from "react-router-dom";
 import { useState } from "react";
 import Input from "antd/es/input/Input";
 import './index.css';
 import { useTabsStore } from "../../../store/useTabsStore";
+import Modal from "../../../components/Modal";
 
-const columns = [
-    {
-        title: '知识库名称',
-        dataIndex: 'knowledgeName',
-        key: 'knowledgeName',
-    },
-    {
-        title: '描述',
-        dataIndex: 'desc',
-        key: 'desc',
-    },
-    {
-        title: '文档数',
-        dataIndex: 'docNumber',
-        key: 'docNumber',
-        sorter: {
-            compare: (a, b) => a.docNumber - b.docNumber,
-        },
-    },
-    {
-        title: '创建人',
-        dataIndex: 'userName',
-        key: 'userName',
-    },
-    {
-        title: '创建时间',
-        dataIndex: 'createTime',
-        key: 'createTime',
-        // 把一个日期转换成时间戳数字。
-        sorter: (a, b) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
-    },
-    {
-        title: '更新时间',
-        dataIndex: 'updateTime',
-        key: 'updateTime',
-        // 把一个日期转换成时间戳数字。
-        sorter: (a, b) => new Date(a.updateTime).getTime() - new Date(b.updateTime).getTime(),
-    },
-    {
-        title: '操作',
-        key: 'action',
-        render: (_, record) => (
-            <Space size="medium">
-                <a onClick={onClickEntry}>进入</a>
-                <a>删除</a>
-            </Space>
-        ),
-    },
-];
+
 
 const data = [
     {
@@ -86,13 +39,31 @@ const data = [
 
 ];
 
+const onChange = (key: string) => {
+    console.log(key);
+  };
+  
+  const items = [
+    {
+      key: '1',
+      label: '公共知识库',
+    },
+    {
+      key: '2',
+      label: '个人知识库' }
+  ];
 
 function KnowledgeBaseList() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
     const [tableData, setTableData] = useState(data);
     const addTab = useTabsStore(s => s.addTab);
-    const setActive = useTabsStore(s => s.setActive);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
+    const showModal = () => {
+        setIsOpen(true);
+        console.log('isOpen', isOpen)
+    };
 
     const columns = [
         {
@@ -145,16 +116,15 @@ function KnowledgeBaseList() {
     ];
 
     function onClickEntry(record: any) {
-        console.log(record)
         const path = `KnowledgeBaseDetail?id=${record.key}`;
 
         addTab({
-            key: record.key,
+            key: `KnowledgeBaseDetail-${record.key}`,
             label: `${record.knowledgeName}-详情`,
             path,
             closable: true
         });
-        
+        console.log('key', `KnowledgeBaseDetail-${record.key}`)
         navigate(path);
     }
 
@@ -178,9 +148,15 @@ function KnowledgeBaseList() {
         setTableData(data);
     };
 
+    function changeIsOpen(isOpen: boolean){
+        setIsOpen(isOpen)
+    }
+
     return (
         <div className="KnowledgeBaseListPage">
-            <h1 className="title">知识库</h1>
+            <h1 className="title">
+            <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
+            </h1>
             <div className="toolbar">
                 <div className="query">
                     <Form
@@ -207,12 +183,13 @@ function KnowledgeBaseList() {
                     </Form>
 
                 </div>
-                <Button type="primary">新增</Button>
+                <Button type="primary" onClick={showModal}>新增</Button>
+                <Modal isOpen={isOpen} changeIsOpen={changeIsOpen}/>
             </div>
 
             <div>
                 <Table columns={columns} dataSource={tableData} showSorterTooltip={false}
-                ></Table>
+                ></Table >
             </div>
         </div>
     )
