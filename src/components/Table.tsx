@@ -11,8 +11,6 @@ interface TableProps {
     data: Record<string, unknown>[]
 };
 
-
-
 function Table({columns, data}: TableProps) {
     return (<AntdTable columns={columns} dataSource={data} />)
 };

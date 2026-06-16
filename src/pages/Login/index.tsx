@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import loginBackground from '../../assets/login-bg.png';
 import { Form, Input, Checkbox, Button } from 'antd';
-import './Login.css';
+import './index.css';
 
 interface FieldType {
     username?: string;
@@ -14,7 +14,7 @@ function Login() {
 
     const onFinish = (values: any) => {
         console.log('Success:', values);
-        navigate("/KnowledgeBaseList")
+        navigate("/", { replace: true });
     };
 
     const onFinishFailed = (errorInfo: any) => {
@@ -24,7 +24,7 @@ function Login() {
     return (
         <div
             className="login-page"
-            style={{ backgroundImage: `url(${loginBackground})` }}
+            style={{backgroundImage: `url(${loginBackground})` }}
         >
             <div className="login-panel">
                 <div className="login-header">

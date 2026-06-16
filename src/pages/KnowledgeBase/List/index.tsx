@@ -1,7 +1,9 @@
 import { Button, Table, Space, Form } from "antd";
+import { Route, BrowserRouter, useNavigate, Routes, Outlet } from "react-router-dom";
 import { useState } from "react";
 import Input from "antd/es/input/Input";
 import './index.css';
+import { useTabsStore } from "../../../store/useTabsStore";
 
 const columns = [
     {
@@ -46,7 +48,7 @@ const columns = [
         key: 'action',
         render: (_, record) => (
             <Space size="medium">
-                <a>进入</a>
+                <a onClick={onClickEntry}>进入</a>
                 <a>删除</a>
             </Space>
         ),
@@ -81,13 +83,80 @@ const data = [
         createTime: '2026-01-03',
         updateTime: '2026-02-02'
     },
-    
+
 ];
 
 
 function KnowledgeBaseList() {
+    const navigate = useNavigate();
     const [form] = Form.useForm();
     const [tableData, setTableData] = useState(data);
+    const addTab = useTabsStore(s => s.addTab);
+    const setActive = useTabsStore(s => s.setActive);
+
+    const columns = [
+        {
+            title: '知识库名称',
+            dataIndex: 'knowledgeName',
+            key: 'knowledgeName',
+        },
+        {
+            title: '描述',
+            dataIndex: 'desc',
+            key: 'desc',
+        },
+        {
+            title: '文档数',
+            dataIndex: 'docNumber',
+            key: 'docNumber',
+            sorter: {
+                compare: (a, b) => a.docNumber - b.docNumber,
+            },
+        },
+        {
+            title: '创建人',
+            dataIndex: 'userName',
+            key: 'userName',
+        },
+        {
+            title: '创建时间',
+            dataIndex: 'createTime',
+            key: 'createTime',
+            // 把一个日期转换成时间戳数字。
+            sorter: (a, b) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
+        },
+        {
+            title: '更新时间',
+            dataIndex: 'updateTime',
+            key: 'updateTime',
+            // 把一个日期转换成时间戳数字。
+            sorter: (a, b) => new Date(a.updateTime).getTime() - new Date(b.updateTime).getTime(),
+        },
+        {
+            title: '操作',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="medium">
+                    <a onClick={()=>onClickEntry(record)}>进入</a>
+                    <a>删除</a>
+                </Space>
+            ),
+        },
+    ];
+
+    function onClickEntry(record: any) {
+        console.log(record)
+        const path = `KnowledgeBaseDetail?id=${record.key}`;
+
+        addTab({
+            key: record.key,
+            label: `${record.knowledgeName}-详情`,
+            path,
+            closable: true
+        });
+        
+        navigate(path);
+    }
 
     const onFinish = (values: any) => {
         const keyword = values.knowledgeName?.trim();
