@@ -1,10 +1,22 @@
 import logo from '../../assets/logo.png';
-import {UserOutlined } from '@ant-design/icons';
+import { UserOutlined } from '@ant-design/icons';
+import { useNavigate } from "react-router-dom";
+import { useTabsStore } from "../../store/useTabsStore";
+
 import './index.css'
 
 function Header() {
+    const navigate = useNavigate();
+    const setActive = useTabsStore((state) => state.setActive);
+
+
+    const goHome = () => {
+        setActive("home");
+        navigate("/");
+    };
+
     return <div className='header'>
-        <a>
+        <a onClick={goHome}>
             <img className='logo' src={logo}></img>
         </a>
         <div className='header-right'>
