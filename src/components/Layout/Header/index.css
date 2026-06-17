@@ -17,3 +17,15 @@
     display: flex;
     align-items: center;
 }
+
+.logOut {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.useInfo {
+    font-size: 30px;
+}

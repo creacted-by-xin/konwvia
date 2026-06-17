@@ -1,7 +1,5 @@
-import { Button, Table, Space, Form } from "antd";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useState, useEffect } from "react";
-import Input from "antd/es/input/Input";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useTabsStore } from "../../store/useTabsStore";
 
 const data = [

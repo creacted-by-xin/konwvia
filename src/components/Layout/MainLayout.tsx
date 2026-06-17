@@ -1,7 +1,6 @@
-import { Route, BrowserRouter, Routes, Navigate, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import TabsBar from "./TabsBar";
-import KnowledgeBaseList from "../../pages/KnowledgeBase/List";
 
 function MainLayout() {
   return <div>

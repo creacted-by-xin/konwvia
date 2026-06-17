@@ -1,4 +1,5 @@
 import { Button, Table, Space, Form, Tabs } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import {useNavigate} from "react-router-dom";
 import { useState } from "react";
 import Input from "antd/es/input/Input";
@@ -6,7 +7,15 @@ import './index.css';
 import { useTabsStore } from "../../../store/useTabsStore";
 import Modal from "../../../components/Modal";
 
-
+interface KnowledgeItem {
+  key: string;
+  knowledgeName: string;
+  desc: string;
+  docNumber: number;
+  userName: string;
+  createTime: string;
+  updateTime: string;
+}
 
 const data = [
     {
@@ -53,6 +62,7 @@ const onChange = (key: string) => {
       label: '个人知识库' }
   ];
 
+
 function KnowledgeBaseList() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
@@ -65,7 +75,7 @@ function KnowledgeBaseList() {
         console.log('isOpen', isOpen)
     };
 
-    const columns = [
+    const columns: ColumnsType<KnowledgeItem>  = [
         {
             title: '知识库名称',
             dataIndex: 'knowledgeName',
@@ -117,7 +127,7 @@ function KnowledgeBaseList() {
 
     function onClickEntry(record: any) {
         const path = `KnowledgeBaseDetail?id=${record.key}`;
-
+        console.log('path', path)
         addTab({
             key: `KnowledgeBaseDetail-${record.key}`,
             label: `${record.knowledgeName}-详情`,
