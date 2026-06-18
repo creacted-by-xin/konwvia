@@ -2,7 +2,9 @@ import { Button, Table, Space, Form } from "antd";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Input from "antd/es/input/Input";
+import { UploadModal } from "../../../components/Modal";
 import { useTabsStore } from "../../../store/useTabsStore";
+
 import './index.css'
 
 const data = [
@@ -44,7 +46,8 @@ function KnowledgeBaseDetail() {
     // 根据URL里的id自动补一个tab
     const [searchParams] = useSearchParams();
     const id = searchParams.get('id');
-    
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
     // 刷新后，新建该路由的tab标签
     useEffect(() => {
         if (!id) return;
@@ -156,6 +159,9 @@ function KnowledgeBaseDetail() {
         navigate(path);
     }
 
+    function changeIsOpen(isOpen: boolean) {
+        setIsOpen(isOpen)
+    }
 
     return (<div>
         <div className="KnowledgeBaseDetailPage">
@@ -163,7 +169,8 @@ function KnowledgeBaseDetail() {
             <div className="desc">描述描述描述描述描述描述描述</div>
             <div className="toolbar">
                 <Space size='medium' >
-                    <Button className="upload">上传文档</Button>
+                    <Button className="upload" onClick={()=>setIsOpen(true)}>上传文档</Button>
+                    <UploadModal isOpen={isOpen} changeIsOpen={changeIsOpen} />
                     <Button className="upload ask" onClick={entryChat}>开始问答</Button>
                 </Space>
                 <Form

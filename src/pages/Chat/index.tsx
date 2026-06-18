@@ -1,6 +1,9 @@
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useTabsStore } from "../../store/useTabsStore";
+import { Flex, Splitter, Typography } from 'antd';
+import ChatList from "./ChatList";
+import './index.css'
 
 const data = [
     {
@@ -56,7 +59,19 @@ function Chat() {
     }, [id, addTab])
 
 
-    return (<div>Chat</div>)
+    return (<div className="chat-page">
+        <Splitter style={{ height: '100%', boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)' }}>
+    <Splitter.Panel size="16%" collapsible >
+      <ChatList/>
+    </Splitter.Panel>
+    <Splitter.Panel>
+      产品需求知识库
+    </Splitter.Panel>
+    <Splitter.Panel size="16%" max="30%"collapsible >
+      引用来源
+    </Splitter.Panel>
+  </Splitter>
+    </div>)
 };
 
 export default Chat;

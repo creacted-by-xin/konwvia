@@ -5,7 +5,7 @@ import { useState } from "react";
 import Input from "antd/es/input/Input";
 import './index.css';
 import { useTabsStore } from "../../../store/useTabsStore";
-import Modal from "../../../components/Modal";
+import {AddModal} from "../../../components/Modal";
 
 interface KnowledgeItem {
   key: string;
@@ -69,11 +69,6 @@ function KnowledgeBaseList() {
     const [tableData, setTableData] = useState(data);
     const addTab = useTabsStore(s => s.addTab);
     const [isOpen, setIsOpen] = useState<boolean>(false);
-
-    const showModal = () => {
-        setIsOpen(true);
-        console.log('isOpen', isOpen)
-    };
 
     const columns: ColumnsType<KnowledgeItem>  = [
         {
@@ -193,8 +188,8 @@ function KnowledgeBaseList() {
                     </Form>
 
                 </div>
-                <Button type="primary" onClick={showModal}>新增</Button>
-                <Modal isOpen={isOpen} changeIsOpen={changeIsOpen}/>
+                <Button type="primary" onClick={()=>setIsOpen(true)}>新增</Button>
+                <AddModal isOpen={isOpen} changeIsOpen={changeIsOpen}/>
             </div>
 
             <div>

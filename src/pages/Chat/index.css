@@ -1,0 +1,32 @@
+.chat-page {
+    height: calc(100vh - 70px - 46px);
+}
+
+.chatList {
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chatListAddBtn {
+    margin: 20px 0;
+    width: 200px;
+    height: 46px;
+    font-size: 22px;
+    align-self: center;
+}
+
+.chatItemList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: scroll;
+}
+
+.chatItem {
+    height: 40px;
+    line-height: 40px;
+    padding: 0 6px;
+    background-color: rgb(219, 203, 203);
+    border-radius: 6px;
+}

@@ -2,3 +2,12 @@
     width: 360px;
     margin: 0 auto;
 }
+
+.upload-tips {
+    font-size: 12px;
+    margin-bottom: 16px;
+}
+
+.ant-upload {
+    margin-bottom: 12px;
+}
