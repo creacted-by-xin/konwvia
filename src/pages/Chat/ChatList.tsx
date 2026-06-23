@@ -20,7 +20,7 @@ const data = [
 const ChatList = () => {
     return (
         <div className="chatList">
-            <h1>会话列表</h1>
+            <h1 className='chatListHeader'>会话列表</h1>
             <Button type="primary" className="chatListAddBtn">新建会话</Button>
             <div className='chatItemList'>
                 {

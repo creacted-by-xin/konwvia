@@ -1,0 +1,26 @@
+.chat-input {
+    padding: 10px;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.chat-input-header {
+    align-self: flex-start;
+}
+
+.chat-input-content {
+    flex: 1;
+    min-height: 0;
+}
+
+.chat-input__textarea {
+     width: 80%;
+     height: 90px;
+     margin-bottom: 10px;
+
+    border-radius: 12px;
+}

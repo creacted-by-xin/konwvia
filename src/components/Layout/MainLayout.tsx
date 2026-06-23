@@ -1,12 +1,15 @@
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import TabsBar from "./TabsBar";
+import './MainLayout.css'
 
 function MainLayout() {
-  return <div style={{height: '100vh'}}>
-    <Header />
-    <div className="content" style={{padding: '0 20px'}}>
+  return <div className="main-layout">
+    <div className="main-layout-top">
+      <Header />
       <TabsBar />
+    </div>
+    <div className="main-layout-content">
       <Outlet />
     </div>
   </div>

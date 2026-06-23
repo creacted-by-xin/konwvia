@@ -1,11 +1,25 @@
 .chat-page {
-    height: calc(100vh - 70px - 46px);
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.chat-page .ant-splitter {
+    height: 100%;
 }
 
 .chatList {
-    padding: 20px 10px;
+    height: 100%;
+    min-height: 0;
+    padding: 10px;
+
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+.chatListHeader {
+    align-self: flex-start;
 }
 
 .chatListAddBtn {
@@ -13,18 +27,33 @@
     width: 200px;
     height: 46px;
     font-size: 22px;
-    align-self: center;
 }
 
 .chatItemList {
+    flex: 1;
+    min-height: 0;
+
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 6px;
-    overflow-y: scroll;
+
+    overflow-y: hidden;
+    scrollbar-width: thin;
+}
+
+/* .chatItemList::-webkit-scrollbar {
+  width: 6px; 
+} */
+
+.chatItemList:hover {
+    overflow-y: auto;
+    
 }
 
 .chatItem {
     height: 40px;
+    width: 230px;
     line-height: 40px;
     padding: 0 6px;
     background-color: rgb(219, 203, 203);
