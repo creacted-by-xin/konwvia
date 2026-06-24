@@ -1,4 +1,5 @@
 import { Button, Table, Space, Form } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Input from "antd/es/input/Input";
@@ -7,7 +8,17 @@ import { useTabsStore } from "../../../store/useTabsStore";
 
 import './index.css'
 
-const data = [
+interface DocumentItem {
+    key: string;
+    knowledgeName: string;
+    desc: string;
+    docNumber: number;
+    userName: string;
+    createTime: string;
+    updateTime: string;
+}
+
+const data: DocumentItem[] = [
     {
         key: '1',
         knowledgeName: 'John Brown',
@@ -65,7 +76,7 @@ function KnowledgeBaseDetail() {
         console.log('id', `KnowledgeBaseDetail-${current.key}`)
     }, [id, addTab])
 
-    const columns = [
+    const columns: ColumnsType<DocumentItem> = [
         {
             title: '文档名称',
             dataIndex: 'knowledgeName',
@@ -113,7 +124,7 @@ function KnowledgeBaseDetail() {
         {
             title: '操作',
             key: 'action',
-            render: (_, record) => (
+            render: () => (
                 <Space size="medium">
                     <a>删除</a>
                 </Space>

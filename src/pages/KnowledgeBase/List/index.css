@@ -1,14 +1,71 @@
 .KnowledgeBaseListPage {
-    padding: 30px;
+    min-height: 100%;
+    padding: 22px;
+    border: 1px solid #e4ebf3;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
 }
 
-.toolbar {
-    padding: 30px 34px;
+.KnowledgeBaseListPage .title {
+    margin-bottom: 16px;
+}
+
+.KnowledgeBaseListPage .ant-tabs-nav {
+    margin-bottom: 0;
+}
+
+.KnowledgeBaseListPage .ant-tabs-tab {
+    font-weight: 600;
+}
+
+.KnowledgeBaseListPage .toolbar {
+    margin-bottom: 18px;
+    padding: 16px;
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
+    gap: 16px;
+    border: 1px solid #e7eef6;
+    border-radius: 8px;
+    background: #f8fbff;
 }
 
+.KnowledgeBaseListPage .query {
+    flex: 1;
+    min-width: 0;
+}
 
+.KnowledgeBaseListPage .ant-input {
+    border-radius: 8px;
+}
 
+.KnowledgeBaseListPage .ant-btn {
+    border-radius: 8px;
+}
 
+.KnowledgeBaseListPage .ant-table-wrapper {
+    overflow: hidden;
+    border: 1px solid #e8eef5;
+    border-radius: 8px;
+}
 
+.KnowledgeBaseListPage .ant-table-thead > tr > th {
+    color: #334155;
+    font-weight: 700;
+    background: #f5f8fc;
+}
+
+.KnowledgeBaseListPage .ant-table-tbody > tr:hover > td {
+    background: #f7fbff;
+}
+
+@media (max-width: 768px) {
+    .KnowledgeBaseListPage {
+        padding: 14px;
+    }
+
+    .KnowledgeBaseListPage .toolbar {
+        flex-direction: column;
+    }
+}

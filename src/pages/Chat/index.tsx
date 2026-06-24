@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useTabsStore } from "../../store/useTabsStore";
-import { Flex, Splitter, Typography } from 'antd';
+import { Splitter } from 'antd';
 import ChatList from "./ChatList";
 import ChatInput from "./ChatInput";
 import './index.css'

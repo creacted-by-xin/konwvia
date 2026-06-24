@@ -1,25 +1,58 @@
 .KnowledgeBaseDetailPage {
-    padding: 30px;
+    min-height: 100%;
+    padding: 24px;
+    border: 1px solid #e4ebf3;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
 }
 
-.toolbar {
-    padding: 30px 30px;
-    display: flex;
-    justify-content: space-between;
+.KnowledgeBaseDetailPage .title {
+    margin-bottom: 8px;
+    font-size: 24px;
+    color: #111827;
+}
+
+.KnowledgeBaseDetailPage .desc {
+    margin-bottom: 18px;
+    color: #64748b;
+}
+
+.KnowledgeBaseDetailPage .toolbar {
+    margin-bottom: 18px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: auto minmax(280px, 1fr) auto;
     align-items: center;
+    gap: 18px;
+    border: 1px solid #e7eef6;
+    border-radius: 8px;
+    background: #f8fbff;
 }
-
 
 .upload {
-    width: 150px;
-    height: 50px;
-    background-color: rgb(143, 143, 228);
-    color: white;
-    font-size: 20px;
+    min-width: 126px;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    color: #ffffff;
+    font-weight: 600;
+    background: #0f5fb8;
+    box-shadow: 0 8px 18px rgba(15, 95, 184, 0.18);
+}
+
+.upload:hover {
+    color: #ffffff !important;
+    background: #0d4f99 !important;
 }
 
 .ask {
-    background-color: rgb(59, 144, 42);
+    background: #17803d;
+    box-shadow: 0 8px 18px rgba(23, 128, 61, 0.16);
+}
+
+.ask:hover {
+    background: #126a33 !important;
 }
 
 .query {
@@ -29,34 +62,65 @@
 }
 
 .formItem {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin-bottom: 0;
 }
 
 .countList {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 82px);
     gap: 10px;
 }
 
 .countItem {
-    padding: 10px 0px;
-    width: 80px;
-    height: 80px;
-    border-radius: 10px;
-    font-size: 14px;
-    background-color: aliceblue;
+    height: 76px;
+    padding: 10px 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid #dce8f5;
+    border-radius: 8px;
+    color: #475569;
+    background: #ffffff;
 }
-
 
 .count {
-    font-size: 20px;
-    font-weight: 1000;
+    font-size: 22px;
+    line-height: 1;
+    font-weight: 800;
+    color: #0f5fb8;
 }
 
+.KnowledgeBaseDetailPage .ant-table-wrapper {
+    overflow: hidden;
+    border: 1px solid #e8eef5;
+    border-radius: 8px;
+}
 
+.KnowledgeBaseDetailPage .ant-table-thead > tr > th {
+    color: #334155;
+    font-weight: 700;
+    background: #f5f8fc;
+}
+
+@media (max-width: 1100px) {
+    .KnowledgeBaseDetailPage .toolbar {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .countList {
+        grid-template-columns: repeat(4, minmax(72px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .KnowledgeBaseDetailPage {
+        padding: 14px;
+    }
+
+    .countList {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+    }
+}

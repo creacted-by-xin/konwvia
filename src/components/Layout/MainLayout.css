@@ -1,37 +1,118 @@
+/* 整个后台系统的最外层容器：负责撑满屏幕，并把页面拆成“顶部区域 + 内容区域”。 */
 .main-layout {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-
-    background-color: #fff;
+    height: 100vh; /* 让布局高度等于浏览器可视区域高度，避免页面只占内容高度。 */
+    display: flex; /* 使用 flex 布局，方便让顶部固定高度、内容区自动占满剩余空间。 */
+    flex-direction: column; /* 垂直排列：上面是 header/tabs，下面是业务页面内容。 */
+    overflow: hidden; /* 外层不滚动，把滚动交给内容区，避免顶部栏跟着页面一起滚走。 */
+    color: #1f2937; /* 设置系统默认文字颜色，比纯黑更柔和，适合后台阅读。 */
+    background: /* 使用轻微纵向渐变，让页面背景有层次，不再是死白底。 */
+        linear-gradient(180deg, #f8fbff 0%, #f4f7fb 42%, #eef3f8 100%);
 }
 
+/* 顶部固定区域：包含 Header 和 TabsBar，是用户切换页面、查看状态的主要工作区。 */
 .main-layout-top {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    flex: 0 0 auto;
-    padding: 0 20px;
-    /* 轻微分隔线，让吸顶区域和内容区有层次 */
-    box-shadow: 0 1px 0 rgba(5, 5, 5, 0.06);
+    position: sticky; /* 吸顶定位：当内容区滚动时，顶部操作区保持在屏幕上方。 */
+    top: 0; /* sticky 的吸附位置为页面顶部。 */
+    z-index: 100; /* 提高层级，避免表格、弹层背景等内容压住顶部栏。 */
+    flex: 0 0 auto; /* 顶部区域不参与剩余空间拉伸，保持由自身内容决定高度。 */
+    padding: 0 24px; /* 左右留白，让顶部内容不要贴边。 */
+    border-bottom: 1px solid rgba(31, 41, 55, 0.08); /* 底部分隔线，用来区分顶部栏和内容区。 */
+    background: rgba(255, 255, 255, 0.88); /* 半透明白底，让顶部更轻盈，同时保持可读性。 */
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06); /* 轻微阴影，增强吸顶栏的层次。 */
+    backdrop-filter: blur(14px); /* 背景模糊，配合半透明背景形成现代后台质感。 */
 }
 
+/* 主内容区域：所有路由页面都会渲染在这里。 */
 .main-layout-content {
-    /*
-    flex: 1 表示吃掉顶部剩下的全部空间
-    这就是替代 calc(100vh - 70px - 46px) 的关键
-  */
-    flex: 1;
-    min-height: 0;
-    padding: 0 20px 20px;
-    display: flex;
-    flex-direction: column;
+    flex: 1; /* 自动占满顶部区域之外的剩余高度。 */
+    min-height: 0; /* flex 子项允许收缩，否则内部表格/聊天区可能把页面撑爆。 */
+    padding: 18px 24px 24px; /* 内容区四周留白，避免业务页面贴住浏览器边缘。 */
+    display: flex; /* 让子页面可以继续使用 flex: 1 撑满内容高度。 */
+    flex-direction: column; /* 内容区内部也按纵向排列，适合后台页面结构。 */
+    overflow: auto; /* 内容超出时只滚动业务区，不影响顶部 header/tabs。 */
 }
 
-.main-layout-top .ant-tabs {
-  margin-bottom: 0;
+/* 标签栏外壳：左边是 Ant Design Tabs，右边是刷新/关闭其他标签按钮。 */
+.tabs-shell {
+    display: flex; /* 横向排列 Tabs 和右侧快捷按钮。 */
+    align-items: center; /* 让标签和按钮在垂直方向对齐。 */
+    gap: 12px; /* Tabs 与快捷按钮之间保留间距。 */
+    min-height: 46px; /* 固定最小高度，避免标签数量变化时顶部栏跳动。 */
 }
 
+/* Ant Design Tabs 本身需要占满剩余宽度。 */
+.tabs-shell .ant-tabs {
+    flex: 1; /* Tabs 占据左侧所有可用空间。 */
+    min-width: 0; /* 允许 Tabs 在小屏下收缩，否则会撑破右侧按钮区域。 */
+    margin-bottom: 0; /* 去掉 antd 默认底部间距，让标签栏和顶部区域更紧凑。 */
+}
+
+/* 去掉 Tabs 导航区域默认下边距，让顶部布局高度更可控。 */
 .main-layout-top .ant-tabs-nav {
-  margin-bottom: 0;
+    margin-bottom: 0;
+}
+
+/* 去掉 antd Tabs 默认底部分割线，避免和我们自己的顶部 border 重复。 */
+.main-layout-top .ant-tabs-nav::before {
+    border-bottom: 0;
+}
+
+/* 普通标签页样式：更轻、更像后台工作台里的页签。 */
+.main-layout-top .ant-tabs-tab {
+    border: 0 !important; /* 覆盖 editable-card 的默认边框，让标签更简洁。 */
+    border-radius: 8px 8px 0 0 !important; /* 顶部圆角，形成页签形态。 */
+    background: transparent !important; /* 非激活标签透明，减少视觉噪音。 */
+    transition: background-color 0.2s ease, color 0.2s ease; /* hover/active 切换时更顺滑。 */
+}
+
+/* 当前激活标签：用浅蓝底提示用户正在看的页面。 */
+.main-layout-top .ant-tabs-tab-active {
+    background: #eef6ff !important;
+}
+
+/* 当前激活标签文字：加深并加粗，提升识别度。 */
+.main-layout-top .ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: #0f5fb8 !important;
+    font-weight: 600;
+}
+
+/* 标签栏右侧快捷操作区域。 */
+.tabs-actions {
+    display: flex; /* 两个图标按钮横向排列。 */
+    align-items: center; /* 图标按钮与标签垂直对齐。 */
+    gap: 4px; /* 两个图标按钮之间保留小间距。 */
+    padding-bottom: 8px; /* 和 Tabs 的视觉基线对齐。 */
+}
+
+/* 快捷按钮默认状态：保持低调，不抢页面主操作。 */
+.tabs-actions .ant-btn {
+    color: #4b5563; /* 默认灰色图标，表示辅助操作。 */
+    border-radius: 6px; /* 小圆角和系统整体 8px 风格保持一致。 */
+}
+
+/* 快捷按钮 hover 状态：提示按钮可以点击。 */
+.tabs-actions .ant-btn:hover {
+    color: #0f5fb8; /* hover 时变为主题蓝，反馈更明确。 */
+    background: #eef6ff; /* 浅蓝背景让图标按钮的点击区域更容易感知。 */
+}
+
+/* “关闭其他标签”是文字按钮，需要比纯图标按钮更宽一点，避免文字显得拥挤。 */
+.tabs-actions .tabs-action-text {
+    padding: 0 8px; /* 给文字按钮左右留白，提升可点击区域和阅读舒适度。 */
+    font-size: 12px; /* 标签栏空间有限，文字按钮使用较小字号。 */
+}
+
+/* 小屏适配：减少左右留白，避免顶部内容挤出屏幕。 */
+@media (max-width: 768px) {
+    .main-layout-top {
+        padding: 0 12px; /* 手机/窄屏减少顶部左右 padding。 */
+    }
+
+    .main-layout-content {
+        padding: 12px; /* 手机/窄屏减少内容区留白，给业务内容更多空间。 */
+    }
+
+    .tabs-shell {
+        align-items: flex-end; /* 小屏下让按钮贴近标签底部，视觉更稳。 */
+    }
 }

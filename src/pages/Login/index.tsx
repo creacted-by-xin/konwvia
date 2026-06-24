@@ -12,7 +12,7 @@ interface FieldType {
 function Login() {
     const navigate = useNavigate();
 
-    const onFinish = (values: any) => {
+    const onFinish = () => {
         // 从后端获取token
         localStorage.setItem("token", "123");
         navigate("/", { replace: true });

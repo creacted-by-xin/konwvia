@@ -24,8 +24,8 @@ const ChatList = () => {
             <Button type="primary" className="chatListAddBtn">新建会话</Button>
             <div className='chatItemList'>
                 {
-                    data.map(item => {
-                        return <div className='chatItem'>{item}</div>
+                    data.map((item, index) => {
+                        return <div className='chatItem' key={`${item}-${index}`}>{item}</div>
                     })
                 }
             </div>

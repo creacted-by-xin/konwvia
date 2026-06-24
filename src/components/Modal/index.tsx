@@ -1,17 +1,9 @@
-import { Modal as AntdModal, Form, Input, Upload, message, Button } from "antd";
+import { Modal as AntdModal, Form, Input, Upload, message } from "antd";
 import { useState } from "react";
-import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
+import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { useForm } from "antd/es/form/Form";
 import './index.css'
-import { createStyles } from 'antd-style';
-
-const useStyles = createStyles(({ token }) => ({
-    root: {
-        borderRadius: token.borderRadius,
-        padding: token.padding,
-    },
-}));
 
 const { TextArea } = Input;
 const { Dragger } = Upload;
@@ -139,7 +131,9 @@ export const UploadModal = ({ isOpen, changeIsOpen }: UploadModalProps) => {
         changeIsOpen(false);
     };
 
-    return <AntdModal
+    return <>
+    {contextHolder}
+    <AntdModal
         className="modal"
         title="上传文档"
         open={isOpen}
@@ -161,4 +155,5 @@ export const UploadModal = ({ isOpen, changeIsOpen }: UploadModalProps) => {
         </p>
       </Dragger>
     </AntdModal>
+    </>
 }
