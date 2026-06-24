@@ -15,7 +15,7 @@ function Login() {
     const onFinish = (values: any) => {
         // 从后端获取token
         localStorage.setItem("token", "123");
-        navigate("/KnowledgeBaseList", { replace: true });
+        navigate("/", { replace: true });
     };
 
     const onFinishFailed = (errorInfo: any) => {
