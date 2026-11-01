@@ -1,39 +1,46 @@
-import Login from "../pages/Login";
-import MainLayout from "../components/Layout/MainLayout";
-import KnowledgeBaseList from "../pages/KnowledgeBase/List";
-import KnowledgeBaseDetail from "../pages/KnowledgeBase/Detail";
-import Chat from "../pages/Chat";
+import { Suspense} from "react";
 import AuthGuard from "./AuthGuard";
 import { createBrowserRouter } from "react-router-dom";
+import { Login, MainLayout, KnowledgeBaseList, KnowledgeBaseDetail, Chat } from "./LazyPages";
+
+
+
+function withLoading(page: React.ReactNode) {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            {page}
+        </Suspense>
+    )
+}
+
 
 const routes = createBrowserRouter([
     {
         path: "/login",
-        element: <Login />
+        element: withLoading(<Login />)
     },
     {
         path: "/",
         element: <AuthGuard />,
         children: [
             {
-                element: <MainLayout />,
+                element: withLoading(<MainLayout />),
                 children: [
                     {
                         index: true,
-                        element: <KnowledgeBaseList />,
+                        element: withLoading(<KnowledgeBaseList />),
                     },
                     {
                         path: "KnowledgeBaseList",
-                        element: <KnowledgeBaseList />,
+                        element: withLoading(<KnowledgeBaseList />),
                     },
                     {
                         path: "KnowledgeBaseDetail",
-                        element: <KnowledgeBaseDetail />,
-                    }
-                    ,
+                        element: withLoading(<KnowledgeBaseDetail />),
+                    },
                     {
                         path: "Chat",
-                        element: <Chat />,
+                        element: withLoading(<Chat />),
                     }
                 ]
             }

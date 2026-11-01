@@ -5,121 +5,80 @@ import { useState, useEffect } from "react";
 import Input from "antd/es/input/Input";
 import { UploadModal } from "../../../components/Modal";
 import { useTabsStore } from "../../../store/useTabsStore";
-
+import type { DocumentType } from "../../../types/domain";
+import { mockDocuments, mockKnowledgeBases} from "../../../mocks/knowledgeBases";
 import './index.css'
 
-interface DocumentItem {
-    key: string;
-    knowledgeName: string;
-    desc: string;
-    docNumber: number;
-    userName: string;
-    createTime: string;
-    updateTime: string;
-}
 
-const data: DocumentItem[] = [
-    {
-        key: '1',
-        knowledgeName: 'John Brown',
-        desc: 'New York No. 1 Lake Park',
-        docNumber: 32,
-        userName: '小王',
-        createTime: '2026-01-01',
-        updateTime: '2026-02-02'
-    },
-    {
-        key: '2',
-        knowledgeName: 'Jim Green',
-        desc: 'New York No. 1 Lake Park',
-        docNumber: 30,
-        userName: '小红',
-        createTime: '2026-01-02',
-        updateTime: '2026-02-02'
-    },
-    {
-        key: '3',
-        knowledgeName: 'Joe Black',
-        desc: 'New York No. 1 Lake Park',
-        docNumber: 31,
-        userName: '小盒',
-        createTime: '2026-01-03',
-        updateTime: '2026-02-02'
-    },
-
-];
 
 function KnowledgeBaseDetail() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [tableData, setTableData] = useState(data);
+    
     const addTab = useTabsStore(s => s.addTab);
     // 根据URL里的id自动补一个tab
     const [searchParams] = useSearchParams();
     const id = searchParams.get('id');
+    const currentKnowledgeBase = mockKnowledgeBases.find(item => String(item.id) === id);
+    const currentDocuments = mockDocuments.filter(item => String(item.knowledgeBaseId) === id);
+    const [tableData, setTableData] = useState(currentDocuments);
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     // 刷新后，新建该路由的tab标签
     useEffect(() => {
         if (!id) return;
-
-        // 拿到当前详情data
-        const current = data.find(item => item.key === id);
-        if (!current) return;
+        if (!currentKnowledgeBase) return;
 
         addTab({
-            key: `KnowledgeBaseDetail-${current.key}`,
-            label: `${current.knowledgeName}-详情`,
-            path: `/KnowledgeBaseDetail?id=${current.key}`,
+            key: `KnowledgeBaseDetail-${currentKnowledgeBase.id}`,
+            label: `${currentKnowledgeBase.name}-详情`,
+            path: `/KnowledgeBaseDetail?id=${currentKnowledgeBase.id}`,
             closable: true
         })
-        console.log('id', `KnowledgeBaseDetail-${current.key}`)
-    }, [id, addTab])
+    }, [id, addTab, currentKnowledgeBase])
 
-    const columns: ColumnsType<DocumentItem> = [
+    const columns: ColumnsType<DocumentType> = [
         {
             title: '文档名称',
-            dataIndex: 'knowledgeName',
-            key: 'knowledgeName',
+            dataIndex: 'name',
+            key: 'name',
         },
         {
             title: '类型',
-            dataIndex: 'desc',
-            key: 'desc',
+            dataIndex: 'fileType',
+            key: 'fileType',
         },
         {
             title: '大小',
-            dataIndex: 'docNumber',
-            key: 'docNumber',
+            dataIndex: 'fileSize',
+            key: 'fileSize',
             sorter: {
-                compare: (a, b) => a.docNumber - b.docNumber,
+                compare: (a, b) => a.fileSize - b.fileSize,
             },
         },
         {
             title: '状态',
-            dataIndex: 'userName',
-            key: 'userName',
+            dataIndex: 'status',
+            key: 'status',
         },
         {
-            title: '进度',
-            dataIndex: 'createTime',
-            key: 'createTime',
+            title: '进度(%)',
+            dataIndex: 'progress',
+            key: 'progress',
             // 把一个日期转换成时间戳数字。
-            sorter: (a, b) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
+            sorter: (a, b) => a.progress - b.progress,
         },
         {
             title: '上传人',
-            dataIndex: 'updateTime',
-            key: 'updateTime',
-            // 把一个日期转换成时间戳数字。
-            sorter: (a, b) => new Date(a.updateTime).getTime() - new Date(b.updateTime).getTime(),
+            dataIndex: 'uploadedBy',
+            key: 'uploadedBy',
         },
         {
             title: '上传时间',
-            dataIndex: 'updateTime',
-            key: 'updateTime',
+            dataIndex: 'uploadedAt',
+            key: 'uploadedAt',
             // 把一个日期转换成时间戳数字。
-            sorter: (a, b) => new Date(a.updateTime).getTime() - new Date(b.updateTime).getTime(),
+            sorter: (a, b) => new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime(),
         },
         {
             title: '操作',
@@ -132,37 +91,37 @@ function KnowledgeBaseDetail() {
         },
     ];
 
-    const onFinish = (values: any) => {
-        const keyword = values.knowledgeName?.trim();
+    const onFinish = (values: { name?: string } ) => {
+        const keyword = values.name?.trim();
 
         if (!keyword) {
-            setTableData(data);
+            setTableData(currentDocuments);
             return;
         };
 
         setTableData(
-            data.filter((item) =>
-                item.knowledgeName.includes(keyword)
+            currentDocuments.filter((item) =>
+                item.name.includes(keyword)
             )
         );
     };
 
     const onReset = () => {
         form.resetFields();
-        setTableData(data);
+        setTableData(currentDocuments);
     };
 
     function entryChat() {
         if (!id) return;
 
         // 拿到当前详情data
-        const current = data.find(item => item.key === id);
+        const current = currentKnowledgeBase ? mockKnowledgeBases.find(item => String(item.id) === id) : null;
         if (!current) return;
         const path = `/Chat?id=${id}`;
 
         addTab({
             key: `Chat-${id}`,
-            label: `${current.knowledgeName}-对话`,
+            label: `${current.name}-对话`,
             path,
             closable: true
         });
@@ -174,9 +133,10 @@ function KnowledgeBaseDetail() {
         setIsOpen(isOpen)
     }
 
+
     return (<div>
         <div className="KnowledgeBaseDetailPage">
-            <h1 className="title">XXX知识库</h1>
+            <h1 className="title">{currentKnowledgeBase?.name || '未知'}知识库</h1>
             <div className="desc">描述描述描述描述描述描述描述</div>
             <div className="toolbar">
                 <Space size='medium' >
@@ -190,7 +150,7 @@ function KnowledgeBaseDetail() {
                     onFinish={onFinish}
                     style={{ maxWidth: 600 }}
                 >
-                    <Form.Item className='formItem' name="knowledgeName">
+                    <Form.Item className='formItem' name="name">
                         <Input placeholder="搜索知识库名称" />
                     </Form.Item>
 

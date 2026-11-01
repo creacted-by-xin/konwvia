@@ -18,7 +18,7 @@ function Login() {
         navigate("/", { replace: true });
     };
 
-    const onFinishFailed = (errorInfo: any) => {
+    const onFinishFailed = (errorInfo: unknown) => {
         console.log('Failed:', errorInfo);
     };
 

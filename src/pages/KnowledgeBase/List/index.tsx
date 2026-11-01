@@ -6,47 +6,8 @@ import Input from "antd/es/input/Input";
 import './index.css';
 import { useTabsStore } from "../../../store/useTabsStore";
 import {AddModal} from "../../../components/Modal";
-
-interface KnowledgeItem {
-  key: string;
-  knowledgeName: string;
-  desc: string;
-  docNumber: number;
-  userName: string;
-  createTime: string;
-  updateTime: string;
-}
-
-const data = [
-    {
-        key: '1',
-        knowledgeName: 'John Brown',
-        desc: 'New York No. 1 Lake Park',
-        docNumber: 32,
-        userName: '小王',
-        createTime: '2026-01-01',
-        updateTime: '2026-02-02'
-    },
-    {
-        key: '2',
-        knowledgeName: 'Jim Green',
-        desc: 'New York No. 1 Lake Park',
-        docNumber: 30,
-        userName: '小红',
-        createTime: '2026-01-02',
-        updateTime: '2026-02-02'
-    },
-    {
-        key: '3',
-        knowledgeName: 'Joe Black',
-        desc: 'New York No. 1 Lake Park',
-        docNumber: 31,
-        userName: '小盒',
-        createTime: '2026-01-03',
-        updateTime: '2026-02-02'
-    },
-
-];
+import type{ KnowledgeBaseType } from "../../../types/domain";
+import { mockKnowledgeBases } from "../../../mocks/knowledgeBases";
 
 const onChange = (key: string) => {
     console.log(key);
@@ -66,47 +27,47 @@ const onChange = (key: string) => {
 function KnowledgeBaseList() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [tableData, setTableData] = useState(data);
+    const [tableData, setTableData] = useState(mockKnowledgeBases);
     const addTab = useTabsStore(s => s.addTab);
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
-    const columns: ColumnsType<KnowledgeItem>  = [
+    const columns: ColumnsType<KnowledgeBaseType>  = [
         {
             title: '知识库名称',
-            dataIndex: 'knowledgeName',
-            key: 'knowledgeName',
+            dataIndex: 'name',
+            key: 'name',
         },
         {
             title: '描述',
-            dataIndex: 'desc',
-            key: 'desc',
+            dataIndex: 'description',
+            key: 'description',
         },
         {
             title: '文档数',
-            dataIndex: 'docNumber',
-            key: 'docNumber',
+            dataIndex: 'documentCount',
+            key: 'documentCount',
             sorter: {
-                compare: (a, b) => a.docNumber - b.docNumber,
+                compare: (a, b) => a.documentCount - b.documentCount,
             },
         },
         {
             title: '创建人',
-            dataIndex: 'userName',
-            key: 'userName',
+            dataIndex: 'createdBy',
+            key: 'createdBy',
         },
         {
             title: '创建时间',
-            dataIndex: 'createTime',
-            key: 'createTime',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
             // 把一个日期转换成时间戳数字。
-            sorter: (a, b) => new Date(a.createTime).getTime() - new Date(b.createTime).getTime(),
+            sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         },
         {
             title: '更新时间',
-            dataIndex: 'updateTime',
-            key: 'updateTime',
+            dataIndex: 'updatedAt',
+            key: 'updatedAt',
             // 把一个日期转换成时间戳数字。
-            sorter: (a, b) => new Date(a.updateTime).getTime() - new Date(b.updateTime).getTime(),
+            sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
         },
         {
             title: '操作',
@@ -120,37 +81,37 @@ function KnowledgeBaseList() {
         },
     ];
 
-    function onClickEntry(record: any) {
-        const path = `KnowledgeBaseDetail?id=${record.key}`;
+    function onClickEntry(record: KnowledgeBaseType) {
+        const path = `KnowledgeBaseDetail?id=${record.id}`;
         console.log('path', path)
         addTab({
-            key: `KnowledgeBaseDetail-${record.key}`,
-            label: `${record.knowledgeName}-详情`,
+            key: `KnowledgeBaseDetail-${record.id}`,
+            label: `${record.name}-详情`,
             path,
             closable: true
         });
-        console.log('key', `KnowledgeBaseDetail-${record.key}`)
+        console.log('key', `KnowledgeBaseDetail-${record.id}`)
         navigate(path);
     }
 
-    const onFinish = (values: any) => {
-        const keyword = values.knowledgeName?.trim();
+    const onFinish = (values: { name?: string }) => {
+        const keyword = values.name?.trim();
 
         if (!keyword) {
-            setTableData(data);
+            setTableData(mockKnowledgeBases);
             return;
         };
 
         setTableData(
-            data.filter((item) =>
-                item.knowledgeName.includes(keyword)
+            mockKnowledgeBases.filter((item) =>
+                item.name.includes(keyword)
             )
         );
     };
 
     const onReset = () => {
         form.resetFields();
-        setTableData(data);
+        setTableData(mockKnowledgeBases);
     };
 
     function changeIsOpen(isOpen: boolean){
@@ -170,7 +131,7 @@ function KnowledgeBaseList() {
                         style={{ maxWidth: 600 }}
                     >
                         <Space align="start">
-                            <Form.Item name="knowledgeName">
+                            <Form.Item name="name">
                                 <Input placeholder="搜索知识库名称" />
                             </Form.Item>
 
