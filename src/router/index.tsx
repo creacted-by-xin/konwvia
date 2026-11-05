@@ -31,15 +31,15 @@ const routes = createBrowserRouter([
                         element: withLoading(<KnowledgeBaseList />),
                     },
                     {
-                        path: "KnowledgeBaseList",
+                        path: "knowledge-bases",
                         element: withLoading(<KnowledgeBaseList />),
                     },
                     {
-                        path: "KnowledgeBaseDetail",
+                        path: "knowledge-bases/:knowledgeBaseId",
                         element: withLoading(<KnowledgeBaseDetail />),
                     },
                     {
-                        path: "Chat",
+                        path: "knowledge-bases/:knowledgeBaseId/chat",
                         element: withLoading(<Chat />),
                     }
                 ]

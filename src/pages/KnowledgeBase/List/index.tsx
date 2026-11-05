@@ -82,15 +82,13 @@ function KnowledgeBaseList() {
     ];
 
     function onClickEntry(record: KnowledgeBaseType) {
-        const path = `KnowledgeBaseDetail?id=${record.id}`;
-        console.log('path', path)
+        const path = `/knowledge-bases/${record.id}`;
         addTab({
-            key: `KnowledgeBaseDetail-${record.id}`,
+            key: path,
             label: `${record.name}-详情`,
             path,
             closable: true
         });
-        console.log('key', `KnowledgeBaseDetail-${record.id}`)
         navigate(path);
     }
 

@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useTabsStore } from "../../store/useTabsStore";
 import { Splitter } from 'antd';
@@ -10,21 +10,20 @@ import './index.css'
 
 function Chat() {
     const addTab = useTabsStore(s => s.addTab);
-    const [searchParams] = useSearchParams();
-    const id = searchParams.get('id');
+    const { knowledgeBaseId: id } = useParams();
 
     useEffect(() => {
         if (!id) return;
 
         // 拿到当前详情data
         const currentKnowledgeBase = mockKnowledgeBases.find(item => String(item.id) === id);
-        
+
         if (!currentKnowledgeBase) return;
-    console.log('current', currentKnowledgeBase.name);    
+        const path = `/knowledge-bases/${id}/chat`;
         addTab({
-            key: `Chat-${currentKnowledgeBase.id}`,
+            key: path,
             label: `${currentKnowledgeBase.name}-对话`,
-            path: `/Chat?id=${currentKnowledgeBase.id}`,
+            path: path,
             closable: true
         })
 
@@ -39,7 +38,7 @@ function Chat() {
             <Splitter.Panel>
                 <ChatInput />
             </Splitter.Panel>
-            <Splitter.Panel defaultSize="16%"  collapsible >
+            <Splitter.Panel defaultSize="16%" collapsible >
                 引用来源
             </Splitter.Panel>
         </Splitter>

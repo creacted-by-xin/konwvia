@@ -1,6 +1,6 @@
 import { Button, Table, Space, Form } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Input from "antd/es/input/Input";
 import { UploadModal } from "../../../components/Modal";
@@ -17,25 +17,30 @@ function KnowledgeBaseDetail() {
     
     const addTab = useTabsStore(s => s.addTab);
     // 根据URL里的id自动补一个tab
-    const [searchParams] = useSearchParams();
-    const id = searchParams.get('id');
+    const { knowledgeBaseId: id } = useParams();
     const currentKnowledgeBase = mockKnowledgeBases.find(item => String(item.id) === id);
     const currentDocuments = mockDocuments.filter(item => String(item.knowledgeBaseId) === id);
     const [tableData, setTableData] = useState(currentDocuments);
+    
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     // 刷新后，新建该路由的tab标签
     useEffect(() => {
         if (!id) return;
         if (!currentKnowledgeBase) return;
+        const path =`/knowledge-bases/${id}`;
 
         addTab({
-            key: `KnowledgeBaseDetail-${currentKnowledgeBase.id}`,
+            key: path,
             label: `${currentKnowledgeBase.name}-详情`,
-            path: `/KnowledgeBaseDetail?id=${currentKnowledgeBase.id}`,
+            path: path,
             closable: true
         })
     }, [id, addTab, currentKnowledgeBase])
+
+    useEffect(() => {
+        setTableData( currentDocuments);
+    })
 
     const columns: ColumnsType<DocumentType> = [
         {
@@ -117,10 +122,10 @@ function KnowledgeBaseDetail() {
         // 拿到当前详情data
         const current = currentKnowledgeBase ? mockKnowledgeBases.find(item => String(item.id) === id) : null;
         if (!current) return;
-        const path = `/Chat?id=${id}`;
+        const path = `/knowledge-bases/${id}/chat`;
 
         addTab({
-            key: `Chat-${id}`,
+            key: path,
             label: `${current.name}-对话`,
             path,
             closable: true

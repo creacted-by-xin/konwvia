@@ -18,6 +18,7 @@
 .logo {
     width: 142px;
     height: 44px;
+    /* 防止图片被拉伸 */
     object-fit: contain;
 }
 
@@ -37,16 +38,23 @@
 
 .header-icon-btn {
     height: 34px;
-    border: 1px solid #d8e4f0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    border: 0;
     border-radius: 8px;
+    font: inherit;
     color: #31506f;
-    background: #ffffff;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .header-icon-btn:hover {
-    color: #0f5fb8 !important;
-    border-color: #b9d8f5 !important;
-    background: #f2f8ff !important;
+    color: #0f5fb8;
+    background: #f2f8ff;
 }
 
 .header-time {
@@ -55,8 +63,8 @@
     align-items: center;
     gap: 8px;
     padding: 0 12px;
-    border: 1px solid #d8e4f0;
-    border-radius: 8px;
+    /* border: 1px solid #d8e4f0;
+    border-radius: 8px; */
     font-size: 13px;
     color: #31506f;
     background: #ffffff;
@@ -67,8 +75,8 @@
     min-width: 168px;
     height: 42px;
     padding: 0 10px 0 8px;
-    border: 1px solid #d8e4f0;
-    border-radius: 8px;
+    /* border: 1px solid #d8e4f0; */
+    /* border-radius: 8px; */
     background: #ffffff;
     cursor: pointer;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
@@ -76,7 +84,7 @@
 
 .user:hover {
     border-color: #9fc8ef;
-    background: #f7fbff;
+    background: #f2f8ff;
     box-shadow: 0 8px 20px rgba(15, 95, 184, 0.08);
 }
 
@@ -134,7 +142,7 @@
 @media (max-width: 768px) {
     .brand-title,
     .header-time,
-    .header-icon-btn span:not(.ant-btn-icon),
+    .header-icon-btn span:not(.anticon),
     .user-meta {
         display: none;
     }

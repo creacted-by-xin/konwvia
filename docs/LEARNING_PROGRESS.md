@@ -1,12 +1,12 @@
 # Knowvia learning and implementation progress
 
-Last observed: 2026-11-01
+Last observed: 2026-11-05
 
 ## Current position
 
 - Roadmap phase: Phase 1 — Frontend engineering baseline.
 - Current milestone: Week 1 — TypeScript and quality baseline.
-- Status: In progress.
+- Status: Implementation acceptance passed; learning review remains unverified.
 
 ## Observed implementation
 
@@ -15,40 +15,36 @@ Last observed: 2026-11-01
 - Protected routes currently use a mock token stored in `localStorage`; there is no real backend authentication yet.
 - Knowledge-base, document, and conversation content still comes from local mock data.
 - The upload modal posts to a mock external endpoint; document parsing and persistence do not exist yet.
-- Route-level lazy loading has been introduced in an uncommitted change.
+- Route-level lazy loading is implemented; lazy page exports live in `src/router/LazyPages.tsx`.
 - Repository-level roadmap, progress, and architecture-decision documents are now established and routed through `AGENTS.md`.
 
 ## Verification evidence
 
-Observed on 2026-11-01:
+Observed on 2026-11-05:
 
-- `npm run build`: passed.
-- `npm run lint`: failed with 9 errors.
-  - Four remaining explicit `any` errors are in the login, knowledge-base list, and knowledge-base detail pages.
-  - Five fast-refresh errors are caused by helper/component exports in `src/router/index.tsx`.
-
-This evidence describes the current worktree and may need to be refreshed after code changes.
+- `npm run lint`: passed.
+- `npm run build`: passed after rerunning outside the sandbox; the initial sandbox run failed with `spawn EPERM` while loading Vite configuration.
+- Shared user, knowledge-base, document, chat-session, and message types exist in `src/types/domain.ts`.
+- No explicit `any` occurrences were found in `src`; core search handlers use explicit input types and the login failure handler uses `unknown`.
+- Knowledge-base and document mock arrays are consolidated in `src/mocks/knowledgeBases.ts`.
+- Week 2 route migration is partially implemented: resource routes, list/detail navigation, and route-param ID reads are present. MainLayout synchronizes tab selection from the URL. The chat page still registers its tab with the obsolete `/Chat?id=...` path. Browser navigation and refresh behavior remain unverified. Pages still import mock arrays directly; no typed API layer or TanStack Query dependency is present.
+- `tsconfig.app.json` does not enable `strict`; passing the build does not demonstrate strict-mode safety.
 
 ## Current next task
 
-Finish the Week 1 quality baseline without changing product behavior:
-
-1. Replace the four remaining explicit `any` uses with form and domain types.
-2. Move the route-loading helper out of `src/router/index.tsx`, or restructure it so the fast-refresh rule passes.
-3. Consolidate repeated mock knowledge-base data behind a typed temporary data module.
-4. Run `npm run lint` and `npm run build`.
+Review the Week 1 concepts and fixes with the user, including the remaining strict-mode configuration gap. Then begin the Week 2 frontend data-boundary slice defined in `PLANS.md`.
 
 ## Current milestone acceptance
 
 - [x] Production build passes.
-- [ ] Lint passes.
-- [ ] Core form and page handlers use explicit safe types instead of `any`.
-- [ ] Repeated mock knowledge-base data has one typed source of truth.
+- [x] Lint passes.
+- [x] Core form and page handlers use explicit safe types instead of `any`.
+- [x] Repeated mock knowledge-base data has one typed source of truth.
 - [ ] Week 1 concepts and important fixes have been reviewed with the user.
 
 ## Active blockers
 
-None. The remaining Week 1 work is locally actionable.
+None. Learning review and the next frontend slice are locally actionable.
 
 ## Learning record
 
@@ -62,3 +58,5 @@ None. The remaining Week 1 work is locally actionable.
 - Move the current milestone only after all milestone acceptance items pass or the user explicitly reprioritizes the roadmap.
 - Record durable learning outcomes, not a transcript of commands or temporary dead ends.
 - Put roadmap changes in `PLANS.md` and architecture rationale in `docs/ARCHITECTURE_DECISIONS.md` instead of duplicating them here.
+
+
