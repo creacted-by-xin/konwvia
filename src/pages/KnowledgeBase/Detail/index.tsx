@@ -6,7 +6,7 @@ import Input from "antd/es/input/Input";
 import { UploadModal } from "../../../components/Modal";
 import { useTabsStore } from "../../../store/useTabsStore";
 import type { DocumentType } from "../../../types/domain";
-import { mockDocuments, mockKnowledgeBases} from "../../../mocks/knowledgeBases";
+import { mockDocuments, mockKnowledgeBases } from "../../../mocks/knowledgeBases";
 import './index.css'
 
 
@@ -14,21 +14,21 @@ import './index.css'
 function KnowledgeBaseDetail() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    
+
     const addTab = useTabsStore(s => s.addTab);
     // 根据URL里的id自动补一个tab
     const { knowledgeBaseId: id } = useParams();
     const currentKnowledgeBase = mockKnowledgeBases.find(item => String(item.id) === id);
     const currentDocuments = mockDocuments.filter(item => String(item.knowledgeBaseId) === id);
     const [tableData, setTableData] = useState(currentDocuments);
-    
+
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
     // 刷新后，新建该路由的tab标签
     useEffect(() => {
         if (!id) return;
         if (!currentKnowledgeBase) return;
-        const path =`/knowledge-bases/${id}`;
+        const path = `/knowledge-bases/${id}`;
 
         addTab({
             key: path,
@@ -38,9 +38,7 @@ function KnowledgeBaseDetail() {
         })
     }, [id, addTab, currentKnowledgeBase])
 
-    useEffect(() => {
-        setTableData( currentDocuments);
-    })
+   
 
     const columns: ColumnsType<DocumentType> = [
         {
@@ -96,18 +94,22 @@ function KnowledgeBaseDetail() {
         },
     ];
 
-    const onFinish = (values: { name?: string } ) => {
-        const keyword = values.name?.trim();
+    const onFinish = (values: { name?: string, status?: string }) => {
+        const name = values.name?.trim();
+        const status = values.status?.trim();
 
-        if (!keyword) {
+        if (!name && !status) {
             setTableData(currentDocuments);
             return;
         };
 
         setTableData(
-            currentDocuments.filter((item) =>
-                item.name.includes(keyword)
-            )
+            currentDocuments.filter((item) => {
+                return (
+                    (!name || item.name.includes(name)) &&
+                    (!status || item.status.includes(status))
+                );
+            })
         );
     };
 
@@ -145,7 +147,7 @@ function KnowledgeBaseDetail() {
             <div className="desc">描述描述描述描述描述描述描述</div>
             <div className="toolbar">
                 <Space size='medium' >
-                    <Button className="upload" onClick={()=>setIsOpen(true)}>上传文档</Button>
+                    <Button className="upload" onClick={() => setIsOpen(true)}>上传文档</Button>
                     <UploadModal isOpen={isOpen} changeIsOpen={changeIsOpen} />
                     <Button className="upload ask" onClick={entryChat}>开始问答</Button>
                 </Space>
@@ -156,7 +158,10 @@ function KnowledgeBaseDetail() {
                     style={{ maxWidth: 600 }}
                 >
                     <Form.Item className='formItem' name="name">
-                        <Input placeholder="搜索知识库名称" />
+                        <Input placeholder="搜索文档" />
+                    </Form.Item>
+                    <Form.Item className='formItem' name="status">
+                        <Input placeholder="搜索状态" />
                     </Form.Item>
 
                     <Form.Item className='formItem'>
