@@ -1,4 +1,4 @@
-import { Button, Table, Space, Form } from "antd";
+import { Button, Table, Space, Form, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -9,18 +9,35 @@ import type { DocumentType } from "../../../types/domain";
 import { mockDocuments, mockKnowledgeBases } from "../../../mocks/knowledgeBases";
 import './index.css'
 
+const statusLabels: Record<string, string> = {
+    pending: '待处理',
+    processing: '解析中',
+    ready: '已完成',
+    failed: '失败',
+};
 
+interface DetailQueryForm {
+    name?: string;
+    docStatus?: DocumentType["status"];
+};
 
 function KnowledgeBaseDetail() {
     const navigate = useNavigate();
-    const [form] = Form.useForm();
+    const [form] = Form.useForm<DetailQueryForm>();
 
     const addTab = useTabsStore(s => s.addTab);
     // 根据URL里的id自动补一个tab
     const { knowledgeBaseId: id } = useParams();
+    const tabKey = `knowledge-bases/${id}`
+    const savedName = useTabsStore(state => state.querys[tabKey]?.name ?? '');
+    const savedStatus = useTabsStore(state => state.querys[tabKey]?.docStatus);
+    const setDetailQuery = useTabsStore(state => state.setDetailQuery);
     const currentKnowledgeBase = mockKnowledgeBases.find(item => String(item.id) === id);
     const currentDocuments = mockDocuments.filter(item => String(item.knowledgeBaseId) === id);
-    const [tableData, setTableData] = useState(currentDocuments);
+    const tableData = currentDocuments.filter(item =>
+        item.name.includes(savedName) &&
+        (savedStatus === undefined || item.status === savedStatus)
+    );
 
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -38,7 +55,12 @@ function KnowledgeBaseDetail() {
         })
     }, [id, addTab, currentKnowledgeBase])
 
-   
+    useEffect(() => {
+        form.setFieldsValue({
+            name: savedName,
+            docStatus: savedStatus,
+        })
+    }, [tabKey, savedName, savedStatus, form])
 
     const columns: ColumnsType<DocumentType> = [
         {
@@ -63,6 +85,7 @@ function KnowledgeBaseDetail() {
             title: '状态',
             dataIndex: 'status',
             key: 'status',
+            render: (status: string) => statusLabels[status] ?? status
         },
         {
             title: '进度(%)',
@@ -94,29 +117,24 @@ function KnowledgeBaseDetail() {
         },
     ];
 
-    const onFinish = (values: { name?: string, status?: string }) => {
-        const name = values.name?.trim();
-        const status = values.status?.trim();
+    const onFinish = (values: DetailQueryForm) => {
+        form.setFieldsValue({
+            name: savedName,
+            docStatus: savedStatus,
+        });
 
-        if (!name && !status) {
-            setTableData(currentDocuments);
-            return;
-        };
-
-        setTableData(
-            currentDocuments.filter((item) => {
-                return (
-                    (!name || item.name.includes(name)) &&
-                    (!status || item.status.includes(status))
-                );
-            })
-        );
+        setDetailQuery(tabKey, {
+            name: values.name?.trim() ?? "",
+            docStatus: values.docStatus,
+        });
     };
 
     const onReset = () => {
-        form.resetFields();
-        setTableData(currentDocuments);
-    };
+    if (!id) return;
+
+    form.resetFields();
+    setDetailQuery(tabKey, {});
+};
 
     function entryChat() {
         if (!id) return;
@@ -158,10 +176,17 @@ function KnowledgeBaseDetail() {
                     style={{ maxWidth: 600 }}
                 >
                     <Form.Item className='formItem' name="name">
-                        <Input placeholder="搜索文档" />
+                        <Input placeholder="文档名称" />
                     </Form.Item>
-                    <Form.Item className='formItem' name="status">
-                        <Input placeholder="搜索状态" />
+                    <Form.Item className='formItem' name="docStatus">
+                        <Select placeholder="状态"
+                            style={{ width: 140 }}
+                            options={[
+                                { label: '待处理', value: 'pending' },
+                                { label: '解析中', value: 'processing' },
+                                { label: '已完成', value: 'ready' },
+                                { label: '失败', value: 'failed' },
+                            ]} />
                     </Form.Item>
 
                     <Form.Item className='formItem'>

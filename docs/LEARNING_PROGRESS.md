@@ -1,6 +1,6 @@
 # Knowvia learning and implementation progress
 
-Last observed: 2026-11-05
+Last observed: 2026-11-06
 
 ## Current position
 
@@ -27,7 +27,7 @@ Observed on 2026-11-05:
 - Shared user, knowledge-base, document, chat-session, and message types exist in `src/types/domain.ts`.
 - No explicit `any` occurrences were found in `src`; core search handlers use explicit input types and the login failure handler uses `unknown`.
 - Knowledge-base and document mock arrays are consolidated in `src/mocks/knowledgeBases.ts`.
-- Week 2 route migration is partially implemented: resource routes, list/detail navigation, and route-param ID reads are present. MainLayout synchronizes tab selection from the URL. The chat page still registers its tab with the obsolete `/Chat?id=...` path. Browser navigation and refresh behavior remain unverified. Pages still import mock arrays directly; no typed API layer or TanStack Query dependency is present.
+- Week 2 inspection: resource routes and route-param ID reads are implemented for detail/chat; their tab keys use resource paths, and MainLayout synchronizes selection from the URL. Browser back/forward and refresh remain unverified. Inspected on 2026-11-06: KnowledgeBaseBoundary now validates ID format and resource existence, renders NotFound on failure, and wraps detail/chat through nested routes; a sibling wildcard route handles unmatched paths. Browser behavior remains unverified. Pages still import mock arrays directly; typed API modules, async adapters, TanStack Query, request cancellation, and mutation invalidation are absent. The tab store has query-state storage and cleanup, but the detail page does not read/write it; its tableData still uses a one-time useState initializer, so resource-switch data isolation and query restoration remain unfinished.
 - `tsconfig.app.json` does not enable `strict`; passing the build does not demonstrate strict-mode safety.
 
 ## Current next task
@@ -58,5 +58,7 @@ None. Learning review and the next frontend slice are locally actionable.
 - Move the current milestone only after all milestone acceptance items pass or the user explicitly reprioritizes the roadmap.
 - Record durable learning outcomes, not a transcript of commands or temporary dead ends.
 - Put roadmap changes in `PLANS.md` and architecture rationale in `docs/ARCHITECTURE_DECISIONS.md` instead of duplicating them here.
+
+
 
 

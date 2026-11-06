@@ -18,15 +18,15 @@ export interface KnowledgeBaseType {
 }
 
 export interface DocumentType {
-      id: number
-      knowledgeBaseId: number
-      name: string
-  fileType: string
-  fileSize: number
-  status: 'pending' | 'processing' | 'ready' | 'failed'
-  progress: number
-  uploadedBy: string
-  uploadedAt: string
+    id: number
+    knowledgeBaseId: number
+    name: string
+    fileType: string
+    fileSize: number
+    status: 'pending' | 'processing' | 'ready' | 'failed'
+    progress: number
+    uploadedBy: string
+    uploadedAt: string
 }
 
 

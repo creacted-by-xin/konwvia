@@ -1,37 +1,42 @@
 import { Button, Table, Space, Form, Tabs } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import {useNavigate} from "react-router-dom";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Input from "antd/es/input/Input";
 import './index.css';
 import { useTabsStore } from "../../../store/useTabsStore";
-import {AddModal} from "../../../components/Modal";
-import type{ KnowledgeBaseType } from "../../../types/domain";
+import { AddModal } from "../../../components/Modal";
+import type { KnowledgeBaseType } from "../../../types/domain";
 import { mockKnowledgeBases } from "../../../mocks/knowledgeBases";
 
-const onChange = (key: string) => {
-    console.log(key);
-  };
-  
-  const items = [
+const items = [
     {
-      key: '1',
-      label: '公共知识库',
+        key: '1',
+        label: '公共知识库',
     },
     {
-      key: '2',
-      label: '个人知识库' }
-  ];
+        key: '2',
+        label: '个人知识库'
+    }
+];
 
 
 function KnowledgeBaseList() {
     const navigate = useNavigate();
     const [form] = Form.useForm();
-    const [tableData, setTableData] = useState(mockKnowledgeBases);
     const addTab = useTabsStore(s => s.addTab);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const savedName = useTabsStore(state => state.querys.home?.name ?? '');
+    const setDetailQuery = useTabsStore(state => state.setDetailQuery);
+    const tableData = mockKnowledgeBases.filter(item => item.name.includes(savedName));
 
-    const columns: ColumnsType<KnowledgeBaseType>  = [
+    useEffect(() => {
+        form.setFieldsValue({
+            name: savedName,
+        })
+    }, [savedName, form])
+
+    const columns: ColumnsType<KnowledgeBaseType> = [
         {
             title: '知识库名称',
             dataIndex: 'name',
@@ -74,7 +79,7 @@ function KnowledgeBaseList() {
             key: 'action',
             render: (_, record) => (
                 <Space size="medium">
-                    <a onClick={()=>onClickEntry(record)}>进入</a>
+                    <a onClick={() => onClickEntry(record)}>进入</a>
                     <a>删除</a>
                 </Space>
             ),
@@ -95,31 +100,26 @@ function KnowledgeBaseList() {
     const onFinish = (values: { name?: string }) => {
         const keyword = values.name?.trim();
 
-        if (!keyword) {
-            setTableData(mockKnowledgeBases);
-            return;
-        };
+        form.setFieldsValue({
+            name: keyword,
+        });
 
-        setTableData(
-            mockKnowledgeBases.filter((item) =>
-                item.name.includes(keyword)
-            )
-        );
+        setDetailQuery('home', { name: keyword })
     };
 
     const onReset = () => {
         form.resetFields();
-        setTableData(mockKnowledgeBases);
+        setDetailQuery('home', {});
     };
 
-    function changeIsOpen(isOpen: boolean){
+    function changeIsOpen(isOpen: boolean) {
         setIsOpen(isOpen)
     }
 
     return (
         <div className="KnowledgeBaseListPage">
             <h1 className="title">
-            <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
+                <Tabs defaultActiveKey="1" items={items} />
             </h1>
             <div className="toolbar">
                 <div className="query">
@@ -147,8 +147,8 @@ function KnowledgeBaseList() {
                     </Form>
 
                 </div>
-                <Button type="primary" onClick={()=>setIsOpen(true)}>新增</Button>
-                <AddModal isOpen={isOpen} changeIsOpen={changeIsOpen}/>
+                <Button type="primary" onClick={() => setIsOpen(true)}>新增</Button>
+                <AddModal isOpen={isOpen} changeIsOpen={changeIsOpen} />
             </div>
 
             <div>

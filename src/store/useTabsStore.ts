@@ -1,9 +1,10 @@
 import { create } from 'zustand';
+import type {DocumentType} from '../types/domain'
 
 interface tabQuery {
     name?: string,
     type?: string,
-    status?: string,
+    docStatus?: DocumentType['status'],
     startTime?: string,
     endTime?: string,
 }
@@ -69,26 +70,30 @@ export const useTabsStore = create<useTabsStoreType>((set, get) => ({
     },
 
     closeOtherTabs: () => {
-        // get() 可以拿到当前 store 的最新状态，这里需要同时读取 tabs 和 active。
-        const { tabs, active, querys } = get();
-        // 根据 active key 找到当前正在查看的标签对象，后面要把它保留下来。
-        const activeTab = tabs.find((tab: Tab) => tab.key === active);
+        set(state=> {
+            // 保留首页和当前标签
+            const tabs = state.tabs.filter(
+                tab=> tab.key === 'home' || tab.key === state.active
+            );
 
-        const activeQuery: Record<string, tabQuery> = {};
-        
+            // 创建一个对象，保存需要保留tbs页的查询条件
+            const savingQuery: Record<string, tabQuery> = {};
 
-        set({
-            // 保留默认首页标签；如果当前标签不是首页，则额外保留当前标签。
-            // 例如：当前在 Chat 标签，点击“关闭其他标签”后，剩下 home + Chat。
-            // 如果当前就在 home，点击后只需要剩下 home。
-            tabs: activeTab && activeTab.key !== 'home'
-                ? [...defaultTabs, activeTab]
-                : defaultTabs,
-            querys: activeTab && activeTab.key !== 'home' 
-            ? { ...activeQuery, [activeTab.key]: querys[activeTab.key] } : {},
-            // active 不变，是为了保证用户点击后仍停留在当前正在看的页面。
-            active,
+            //对应页签和查询条件
+            for(const tab of tabs){
+                // 拿到查询条件
+                const query = state.querys[tab.key];
 
+                if(query !== undefined){
+                    savingQuery[tab.key] = query;
+                }
+            };
+
+            return {
+                tabs,
+                active: tabs.some(tab=> tab.key === state.active)? state.active : 'home',
+                querys: savingQuery
+            }
         })
     },
 

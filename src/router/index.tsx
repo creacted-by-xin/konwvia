@@ -1,7 +1,7 @@
-import { Suspense} from "react";
+import { Suspense } from "react";
 import AuthGuard from "./AuthGuard";
 import { createBrowserRouter } from "react-router-dom";
-import { Login, MainLayout, KnowledgeBaseList, KnowledgeBaseDetail, Chat } from "./LazyPages";
+import { Login, MainLayout, KnowledgeBaseList, KnowledgeBaseDetail, Chat, NotFound, KnowledgeBaseBoundary } from "./LazyPages";
 
 
 
@@ -36,12 +36,23 @@ const routes = createBrowserRouter([
                     },
                     {
                         path: "knowledge-bases/:knowledgeBaseId",
-                        element: withLoading(<KnowledgeBaseDetail />),
+                        element: withLoading(<KnowledgeBaseBoundary />),
+                        children: [
+                            {
+                               index: true,
+                                element: withLoading(<KnowledgeBaseDetail />),
+                            },
+                            {
+                                path: "chat",
+                                element: withLoading(<Chat />),
+                            },
+
+                        ]
                     },
                     {
-                        path: "knowledge-bases/:knowledgeBaseId/chat",
-                        element: withLoading(<Chat />),
-                    }
+                        path: "*",
+                        element: withLoading(<NotFound />),
+                    },
                 ]
             }
         ]
@@ -49,3 +60,5 @@ const routes = createBrowserRouter([
 ]);
 
 export default routes;
+
+
