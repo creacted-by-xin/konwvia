@@ -1,6 +1,6 @@
 # Knowvia learning and implementation progress
 
-Last observed: 2026-11-06
+Last observed: 2026-11-10
 
 ## Current position
 
@@ -27,12 +27,17 @@ Observed on 2026-11-05:
 - Shared user, knowledge-base, document, chat-session, and message types exist in `src/types/domain.ts`.
 - No explicit `any` occurrences were found in `src`; core search handlers use explicit input types and the login failure handler uses `unknown`.
 - Knowledge-base and document mock arrays are consolidated in `src/mocks/knowledgeBases.ts`.
-- Week 2 inspection: resource routes and route-param ID reads are implemented for detail/chat; their tab keys use resource paths, and MainLayout synchronizes selection from the URL. Browser back/forward and refresh remain unverified. Inspected on 2026-11-06: KnowledgeBaseBoundary now validates ID format and resource existence, renders NotFound on failure, and wraps detail/chat through nested routes; a sibling wildcard route handles unmatched paths. Browser behavior remains unverified. Pages still import mock arrays directly; typed API modules, async adapters, TanStack Query, request cancellation, and mutation invalidation are absent. The tab store has query-state storage and cleanup, but the detail page does not read/write it; its tableData still uses a one-time useState initializer, so resource-switch data isolation and query restoration remain unfinished.
+- Week 2 inspection: resource routes and route-param ID reads are implemented for detail/chat; their tab keys use resource paths, and MainLayout synchronizes selection from the URL. Browser back/forward and refresh remain unverified. Inspected on 2026-11-06: KnowledgeBaseBoundary now validates ID format and resource existence, renders NotFound on failure, and wraps detail/chat through nested routes; a sibling wildcard route handles unmatched paths. Browser behavior remains unverified. Pages still import mock arrays directly; A typed list API function now returns copied mock knowledge bases after a delay, and the list page loads it in an Effect with cleanup and loading state. Detail/chat/boundary still read mocks directly. TanStack Query, request cancellation, and mutation invalidation remain absent. Inspected on 2026-11-10: detail now reads/writes saved name and docStatus filters, restores form fields, and derives table data from the current resource and saved filters. Follow-up inspection confirmed that query tabKey now includes the leading slash and matches tab keys, and submit no longer restores stale form values. Query restoration and close cleanup are connected in code. The user reports success; browser interaction has not been independently verified.
 - `tsconfig.app.json` does not enable `strict`; passing the build does not demonstrate strict-mode safety.
+
+## Latest checks — 2026-11-10
+
+- npm run lint: latest run failed with one unused error-state variable in the knowledge-base list page. Error UI is not connected. The list also saves the search keyword but does not filter its loaded table data, so search behavior is incomplete.
+- npm run build: passed outside the sandbox after the initial Vite configuration load failed with sandbox spawn EPERM.
 
 ## Current next task
 
-Review the Week 1 concepts and fixes with the user, including the remaining strict-mode configuration gap. Then begin the Week 2 frontend data-boundary slice defined in `PLANS.md`.
+Introduce one typed async knowledge-base list adapter and replace the list page direct mock import, then connect TanStack Query and verify loading/error/empty behavior. Browser route and query-state acceptance still needs independent verification. Week 1 learning review and strict-mode configuration remain outstanding.
 
 ## Current milestone acceptance
 
@@ -58,6 +63,10 @@ None. Learning review and the next frontend slice are locally actionable.
 - Move the current milestone only after all milestone acceptance items pass or the user explicitly reprioritizes the roadmap.
 - Record durable learning outcomes, not a transcript of commands or temporary dead ends.
 - Put roadmap changes in `PLANS.md` and architecture rationale in `docs/ARCHITECTURE_DECISIONS.md` instead of duplicating them here.
+
+
+
+
 
 
 

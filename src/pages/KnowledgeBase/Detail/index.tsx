@@ -28,7 +28,7 @@ function KnowledgeBaseDetail() {
     const addTab = useTabsStore(s => s.addTab);
     // 根据URL里的id自动补一个tab
     const { knowledgeBaseId: id } = useParams();
-    const tabKey = `knowledge-bases/${id}`
+    const tabKey = `/knowledge-bases/${id}`
     const savedName = useTabsStore(state => state.querys[tabKey]?.name ?? '');
     const savedStatus = useTabsStore(state => state.querys[tabKey]?.docStatus);
     const setDetailQuery = useTabsStore(state => state.setDetailQuery);
@@ -118,11 +118,6 @@ function KnowledgeBaseDetail() {
     ];
 
     const onFinish = (values: DetailQueryForm) => {
-        form.setFieldsValue({
-            name: savedName,
-            docStatus: savedStatus,
-        });
-
         setDetailQuery(tabKey, {
             name: values.name?.trim() ?? "",
             docStatus: values.docStatus,
