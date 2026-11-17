@@ -1,6 +1,6 @@
 # Knowvia learning and implementation progress
 
-Last observed: 2026-11-10
+Last observed: 2026-11-17
 
 ## Current position
 
@@ -67,6 +67,16 @@ None. Learning review and the next frontend slice are locally actionable.
 
 
 
+
+
+
+
+
+## Follow-up inspection — 2026-11-17
+
+- TanStack Query is installed and QueryClientProvider is connected. The list uses useQuery, local filtering, and explicit refetch on query/reset. Follow-up inspection confirms isFetching is now used for table/button loading. Query/reset explicitly call refetch; errors are rendered. Table rowKey=id and an explicit retry button are now present. The API correctly throws Error for a temporary first-request failure. Browser failure/retry acceptance remains unverified; obsolete comments and commented manual-request code remain.
+- npm run lint passed. TypeScript build check was run separately; see current command output. The latest lint and npx tsc -b both passed. No browser acceptance was performed.
+- Latest inspection: temporary first-request failure has been removed. The list query passes AbortSignal into the API; its delay handles pre-abort, clears the timer on abort, rejects with AbortError, and removes listeners. Lint and npx tsc -b passed. Runtime cancellation and failure/retry acceptance remain independently unverified. Next slice: migrate detail document data to a typed asynchronous API/useQuery; knowledge-base metadata migration and mutation invalidation remain outstanding.
 
 
 
