@@ -1,6 +1,35 @@
 import type { KnowledgeBaseType } from '../types/domain';
 import { mockKnowledgeBases } from '../mocks/knowledgeBases';
 
+interface CreateKnowledgeBaseInput {
+    name: string,
+    description: string
+}
+
+// 创建数据库
+export async function createKnowledgeBase(input: CreateKnowledgeBaseInput): Promise<KnowledgeBaseType> {
+    const { name, description = '' } = input;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const nextName = name.trim();
+    if (!nextName) throw new Error('知识库名称不能为空');
+
+    const nextId = mockKnowledgeBases.reduce((max, item)=> Math.max(max, item.id), 0) +1;
+
+    const nextKnowledge = {
+        id: nextId,
+        name: nextName,
+        description: description,
+        documentCount: 0,
+        createdBy: 'user',
+        createdAt: new Date().toISOString().slice(0,10),
+        updatedAt: new Date().toISOString().slice(0,10),
+    }
+
+    mockKnowledgeBases.push(nextKnowledge)
+
+    return nextKnowledge
+}
+
 // 模拟等待，并处理取消（定义一个“可以取消的等待函数”）
 // ms时间、signal用来接收取消通知、Promise等待完成后不提供数据，只通知完成
 export function delay(ms: number, signal: AbortSignal): Promise<void> {
@@ -39,6 +68,7 @@ export function delay(ms: number, signal: AbortSignal): Promise<void> {
 }
 
 
+// 查询知识库函数，返回全部知识库
 export async function ListKnowledgeBases(signal: AbortSignal): Promise<KnowledgeBaseType[]> {
     // 负责可取消的等待
     await delay(1000, signal);
@@ -48,6 +78,7 @@ export async function ListKnowledgeBases(signal: AbortSignal): Promise<Knowledge
     return mockKnowledgeBases.map(item => ({ ...item }))
 }
 
+// —— 单条详情，按 id 取某一个知识库
 export async function getKnowledgeBase(
     id: number,
     signal: AbortSignal

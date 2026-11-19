@@ -3,11 +3,11 @@ import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Input from "antd/es/input/Input";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTabsStore } from "../../../store/useTabsStore";
 import { AddModal } from "../../../components/Modal";
 import type { KnowledgeBaseType } from "../../../types/domain";
-import { ListKnowledgeBases } from "../../../api/knowledgeBases";
+import { ListKnowledgeBases, createKnowledgeBase } from "../../../api/knowledgeBases";
 import './index.css';
 
 const items = [
@@ -29,6 +29,13 @@ function KnowledgeBaseList() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const savedName = useTabsStore(state => state.querys.home?.name ?? '');
     const setDetailQuery = useTabsStore(state => state.setDetailQuery);
+    // 给我这个全局管家的遥控器
+    // useQuery 只管自己那一份数据（比如列表）。
+    // 新建成功后，列表那份缓存还是旧的。列表自己不知道「有人刚写过数据」。
+    // 所以要在 mutation 成功后，对管家说：['knowledge-bases', 'list'] 这份过期了，请重新拉。」
+    const queryClient = useQueryClient();
+
+
     // 保存是否正在加载。初始是 true，所以页面首次显示时可以展示加载动画。
     // const [loading, setLoading] = useState<boolean>(true);
     // // 成功
@@ -78,10 +85,21 @@ function KnowledgeBaseList() {
         // 数据的缓存标识
         queryKey: ['knowledge-bases', 'list'],
         // TanStack Query 调用 queryFn 时，传入的是一个包含多项信息的对象，`signal` 只是其中一个属性。
-        queryFn: ({signal}) => ListKnowledgeBases(signal),
+        queryFn: ({ signal }) => ListKnowledgeBases(signal),
         retry: false,
         refetchOnWindowFocus: false
     });
+
+
+    const { mutateAsync, isPending } = useMutation({
+        mutationFn: createKnowledgeBase,
+        // 成功后刷新列表
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ['knowledge-bases', 'list'],
+            })
+        }
+    })
 
     const filteredData = tableData.filter(item =>
         item.name.includes(savedName)
@@ -192,10 +210,10 @@ function KnowledgeBaseList() {
 
                             <Form.Item >
                                 <Space>
-                                    <Button type="primary" htmlType="submit" loading={isFetching}>
+                                    <Button type="primary" htmlType="submit" loading={isFetching || isPending}>
                                         查询
                                     </Button>
-                                    <Button htmlType="button" onClick={onReset} loading={isFetching}>
+                                    <Button htmlType="button" onClick={onReset} loading={isFetching || isPending}>
                                         重置
                                     </Button>
                                 </Space>
@@ -205,7 +223,7 @@ function KnowledgeBaseList() {
 
                 </div>
                 <Button type="primary" onClick={() => setIsOpen(true)}>新增</Button>
-                <AddModal isOpen={isOpen} changeIsOpen={changeIsOpen} />
+                <AddModal isOpen={isOpen} changeIsOpen={changeIsOpen} mutateAsync={mutateAsync} isPending={isPending}/>
             </div>
 
             <div>
@@ -214,13 +232,13 @@ function KnowledgeBaseList() {
                         type="error"
                         title={error.message}
                         showIcon
-                        action = {
+                        action={
                             // React 点击按钮时，会把点击事件对象传给处理函数。
                             // 如果不用箭头函数的话，普通函数会把点击事件传给refetch函数
-                                // onClick={refetch}          // 点击时调用，React 会传入事件
-                                // onClick={() => refetch()}  // 点击时调用，由你决定传什么参数
-                                // onClick={refetch()}        // ❌ 渲染时就执行，不是等点击
-                            <Button size="small" onClick={()=> {
+                            // onClick={refetch}          // 点击时调用，React 会传入事件
+                            // onClick={() => refetch()}  // 点击时调用，由你决定传什么参数
+                            // onClick={refetch()}        // ❌ 渲染时就执行，不是等点击
+                            <Button size="small" onClick={() => {
                                 refetch();
                             }} loading={isFetching}>重试</Button>
                         }

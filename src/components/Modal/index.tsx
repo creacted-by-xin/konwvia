@@ -3,34 +3,31 @@ import { useState } from "react";
 import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { useForm } from "antd/es/form/Form";
-import './index.css'
+import type { KnowledgeBaseType } from "../../types/domain";
+
 
 const { TextArea } = Input;
 const { Dragger } = Upload;
 
 interface AddModalProps {
     isOpen: boolean,
-    changeIsOpen: (isOpen: boolean) => void
+    changeIsOpen: (isOpen: boolean) => void,
+    mutateAsync: (input: {name: string, description: string}) => Promise<KnowledgeBaseType>,
+    isPending: boolean
 }
 
-export const AddModal = ({ isOpen, changeIsOpen }: AddModalProps) => {
+export const AddModal = ({ isOpen, changeIsOpen, mutateAsync, isPending }: AddModalProps) => {
     const [form] = useForm()
-    const [confirmLoading, setConfirmLoading] = useState(false);
 
     const handleOk = async () => {
         try {
-            const values = await form.validateFields();
+            const { knowledgeName, desc } = await form.validateFields();
+            await mutateAsync({name: knowledgeName, description: desc})
 
-            console.log(values);
-
-            setConfirmLoading(true);
-            setTimeout(() => {
-                changeIsOpen(false);
-                setConfirmLoading(false);
-                form.resetFields();
-            }, 2000);
+            changeIsOpen(false);
+            form.resetFields();
         } catch (error) {
-            console.log('校验失败', error);
+            message.error('新增失败')
         }
     };
 
@@ -45,7 +42,7 @@ export const AddModal = ({ isOpen, changeIsOpen }: AddModalProps) => {
         open={isOpen}
         onOk={handleOk}
         okText='新增'
-        confirmLoading={confirmLoading}
+        confirmLoading={isPending}
         onCancel={handleCancel}
         cancelText='取消'
         centered
