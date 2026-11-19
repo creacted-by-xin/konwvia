@@ -35,19 +35,18 @@ Observed on 2026-11-05:
 
 ## Latest checks — 2026-11-19
 
-- `npm run lint`: passed.
 - `npx tsc -b`: passed.
-- Pages under `src/pages` and `src/router` no longer import `src/mocks` directly; only `src/api/knowledgeBases.ts` and `src/api/documents.ts` do.
-- Detail documents use `useQuery` with key `['knowledge-bases', id, 'documents']` and `listDocuments(knowledgeBaseId, signal)`.
-- Knowledge-base metadata uses `getKnowledgeBase`; Boundary, Detail, and Chat share query key `['knowledge-bases', id]`. Boundary distinguishes invalid ID format, `NotFoundError`, and other fetch errors with retry.
-- Detail table uses `rowKey="id"`, `loading={isFetching}`, status summary counts, and an error Alert with retry.
-- Browser refresh/back/forward, runtime cancellation, and failure/retry acceptance remain independently unverified.
-- Mutation invalidation (create/update/delete refreshing a changed list) remains outstanding.
+- `npm run lint`: failed — `AddModal` catch 参数 `error` 未使用（`@typescript-eslint/no-unused-vars`）。
+- List page wires `useMutation({ mutationFn: createKnowledgeBase })` and `invalidateQueries(['knowledge-bases', 'list'])`; passes `mutateAsync` / `isPending` into `AddModal`.
+- `AddModal` maps `knowledgeName`/`desc` → `name`/`description`, awaits `mutateAsync`, then closes and resets. `confirmLoading={isPending}`.
+- `createKnowledgeBase` pushes into the shared mock array; return value is still the same object reference as the mock entry (not a copy).
+- `Modal/index.tsx` currently has no `import './index.css'` (style import missing compared with earlier versions).
+- Browser create→list refresh, refresh/back/forward, and invalid-identifier acceptance remain independently unverified.
 - List page still contains obsolete commented manual-request code.
 
 ## Current next task
 
-Add one knowledge-base mutation (for example create or delete) that invalidates the list query and verify the list refreshes. Then independently verify refresh, browser back/forward, and invalid-identifier behavior. Week 1 learning review and strict-mode configuration remain outstanding.
+Fix the AddModal lint (`error` unused / distinguish validation vs API failure), then browser-verify create refreshes the list, plus refresh/back/forward and invalid IDs. Week 1 learning review and strict-mode configuration remain outstanding.
 
 ## Current milestone acceptance
 
@@ -63,11 +62,11 @@ Week 2:
 
 - [x] Pages no longer import business data arrays directly.
 - [ ] Refresh, browser back/forward, and invalid identifiers behave predictably.
-- [ ] Query invalidation refreshes a changed list.
+- [ ] Query invalidation refreshes a changed list. (wired in code; lint + browser evidence pending)
 
 ## Active blockers
 
-None. Mutation invalidation and browser acceptance are locally actionable.
+Lint failure in `AddModal` catch. Browser acceptance still locally actionable.
 
 ## Learning record
 

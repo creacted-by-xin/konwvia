@@ -27,7 +27,7 @@ export async function createKnowledgeBase(input: CreateKnowledgeBaseInput): Prom
 
     mockKnowledgeBases.push(nextKnowledge)
 
-    return nextKnowledge
+    return {...nextKnowledge}
 }
 
 // 模拟等待，并处理取消（定义一个“可以取消的等待函数”）

@@ -12,7 +12,7 @@ const { Dragger } = Upload;
 interface AddModalProps {
     isOpen: boolean,
     changeIsOpen: (isOpen: boolean) => void,
-    mutateAsync: (input: {name: string, description: string}) => Promise<KnowledgeBaseType>,
+    mutateAsync: (input: { name: string, description: string }) => Promise<KnowledgeBaseType>,
     isPending: boolean
 }
 
@@ -22,7 +22,7 @@ export const AddModal = ({ isOpen, changeIsOpen, mutateAsync, isPending }: AddMo
     const handleOk = async () => {
         try {
             const { knowledgeName, desc } = await form.validateFields();
-            await mutateAsync({name: knowledgeName, description: desc})
+            await mutateAsync({ name: knowledgeName, description: desc })
 
             changeIsOpen(false);
             form.resetFields();
@@ -84,33 +84,32 @@ export const UploadModal = ({ isOpen, changeIsOpen }: UploadModalProps) => {
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
 
-  const props: UploadProps = {
-    name: 'file',
-    maxCount: 10,
-    multiple: true,
-    action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
-    headers: {
-      authorization: 'authorization-text',
-    },
-    onChange(info) {
-      if (info.file.status !== 'uploading') {
-        console.log(info.file, info.fileList);
-      }
-      if (info.file.status === 'done') {
-        messageApi.success(`${info.file.name} file uploaded successfully`);
-      } else if (info.file.status === 'error') {
-        messageApi.error(`${info.file.name} file upload failed.`);
-      }
-    },
-    progress: {
-      strokeColor: {
-        '0%': '#108ee9',
-        '100%': '#87d068',
-      },
-      strokeWidth: 3,
-      format: (percent) => percent && `${Number.parseFloat(percent.toFixed(2))}%`,
-    },
-  };
+    const props: UploadProps = {
+        name: 'file',
+        maxCount: 10,
+        multiple: true,
+        action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
+        headers: {
+            authorization: 'authorization-text',
+        },
+        onChange(info) {
+            if (info.file.status !== 'uploading') {
+            }
+            if (info.file.status === 'done') {
+                messageApi.success(`${info.file.name} file uploaded successfully`);
+            } else if (info.file.status === 'error') {
+                messageApi.error(`${info.file.name} file upload failed.`);
+            }
+        },
+        progress: {
+            strokeColor: {
+                '0%': '#108ee9',
+                '100%': '#87d068',
+            },
+            strokeWidth: 3,
+            format: (percent) => percent && `${Number.parseFloat(percent.toFixed(2))}%`,
+        },
+    };
 
     const handleOk = async () => {
         try {
@@ -119,8 +118,14 @@ export const UploadModal = ({ isOpen, changeIsOpen }: UploadModalProps) => {
                 changeIsOpen(false);
                 setConfirmLoading(false);
             }, 2000);
-        } catch (error) {
-            console.log('校验失败', error);
+        } catch (error: unknown) {
+            // Ant Design 校验失败通常带 errorFields
+            if (error && typeof error === 'object' && 'errorFields' in error) {
+                return;
+            }
+            message.error(
+                error instanceof Error ? error.message : '新增失败'
+            );
         }
     };
 
@@ -129,28 +134,28 @@ export const UploadModal = ({ isOpen, changeIsOpen }: UploadModalProps) => {
     };
 
     return <>
-    {contextHolder}
-    <AntdModal
-        className="modal"
-        title="上传文档"
-        open={isOpen}
-        onOk={handleOk}
-        okText='上传'
-        confirmLoading={confirmLoading}
-        onCancel={handleCancel}
-        cancelText='取消'
-        centered
-    >
-        <div className="upload-tips">支持PDF、Word、Excel、PPT、TXT、Markdown；单个文件最大50MB；单次最多10个。</div>
-      <Dragger className="ant-upload" {...props}>
-        <p className="ant-upload-drag-icon">
-          <InboxOutlined />
-        </p>
-        <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-        <p className="ant-upload-hint">
-          上传成功后，系统将自动解析并向量化文档
-        </p>
-      </Dragger>
-    </AntdModal>
+        {contextHolder}
+        <AntdModal
+            className="modal"
+            title="上传文档"
+            open={isOpen}
+            onOk={handleOk}
+            okText='上传'
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            cancelText='取消'
+            centered
+        >
+            <div className="upload-tips">支持PDF、Word、Excel、PPT、TXT、Markdown；单个文件最大50MB；单次最多10个。</div>
+            <Dragger className="ant-upload" {...props}>
+                <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
+                <p className="ant-upload-hint">
+                    上传成功后，系统将自动解析并向量化文档
+                </p>
+            </Dragger>
+        </AntdModal>
     </>
 }
