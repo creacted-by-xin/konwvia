@@ -47,3 +47,19 @@ export async function ListKnowledgeBases(signal: AbortSignal): Promise<Knowledge
     // 返回新的对象数组，避免直接返回mockKnowledgeBases导致的引用问题
     return mockKnowledgeBases.map(item => ({ ...item }))
 }
+
+export async function getKnowledgeBase(
+    id: number,
+    signal: AbortSignal
+): Promise<KnowledgeBaseType> {
+    await delay(1000, signal);
+
+    const found = mockKnowledgeBases.find(item => item.id === id);
+    if (!found) {
+        const error = new Error('知识库不存在');
+        error.name = 'NotFoundError';
+        throw error;
+    }
+
+    return { ...found };
+}

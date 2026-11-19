@@ -1,10 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
-import { useTabsStore } from "../../store/useTabsStore";
+import { useQuery } from "@tanstack/react-query";
 import { Splitter } from 'antd';
+import { useTabsStore } from "../../store/useTabsStore";
+import { getKnowledgeBase } from "../../api/knowledgeBases";
 import ChatList from "./ChatList";
 import ChatInput from "./ChatInput";
-import { mockKnowledgeBases } from "../../mocks/knowledgeBases";
 import './index.css'
 
 
@@ -12,13 +13,19 @@ function Chat() {
     const addTab = useTabsStore(s => s.addTab);
     const { knowledgeBaseId: id } = useParams();
 
+    // 与 Boundary / Detail 共用同一 queryKey，通常直接命中缓存
+    const { data: currentKnowledgeBase } = useQuery({
+        queryKey: ['knowledge-bases', id],
+        queryFn: ({ signal }) => getKnowledgeBase(Number(id), signal),
+        enabled: Boolean(id),
+        retry: false,
+        refetchOnWindowFocus: false,
+    });
+
     useEffect(() => {
         if (!id) return;
-
-        // 拿到当前详情data
-        const currentKnowledgeBase = mockKnowledgeBases.find(item => String(item.id) === id);
-
         if (!currentKnowledgeBase) return;
+
         const path = `/knowledge-bases/${id}/chat`;
         addTab({
             key: path,
@@ -26,8 +33,7 @@ function Chat() {
             path: path,
             closable: true
         })
-
-    }, [id, addTab])
+    }, [id, addTab, currentKnowledgeBase])
 
 
     return (<div className="chat-page">
