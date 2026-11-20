@@ -1,12 +1,13 @@
 # Knowvia learning and implementation progress
 
-Last observed: 2026-11-19
+Last observed: 2026-11-20
 
 ## Current position
 
-- Roadmap phase: Phase 1 — Frontend engineering baseline.
-- Current milestone: Week 2 — Frontend data boundaries.
-- Status: List/detail/boundary/chat no longer import mock arrays directly; mutation invalidation and browser acceptance remain open. Week 1 learning review remains unverified.
+- Roadmap phase: Phase 2 — HTTP and backend foundations.
+- Current milestone: Week 3 — Node.js, HTTP, and NestJS.
+- Status: Entering Week 3 by user request. No backend package exists yet; first slice is scaffold NestJS with a health endpoint.
+- Deferred reminder: User asked to postpone Week 1+2 learning review; **remind them to review before or at the start of the next milestone after Week 3 work is underway / when they next ask for status or next phase**.
 
 ## Observed implementation
 
@@ -18,8 +19,10 @@ Last observed: 2026-11-19
 - Route-level lazy loading is implemented; lazy page exports live in `src/router/LazyPages.tsx`.
 - Repository-level roadmap, progress, and architecture-decision documents are now established and routed through `AGENTS.md`.
 - TanStack Query is installed and QueryClientProvider is connected.
-- Typed adapters exist for `ListKnowledgeBases`, `getKnowledgeBase`, and `listDocuments`; each accepts `AbortSignal` and returns copied mock data after a cancellable delay.
+- Typed adapters exist for `ListKnowledgeBases`, `getKnowledgeBase`, `listDocuments`, and `createKnowledgeBase`.
 - List, detail, boundary, and chat pages load knowledge-base or document data through `useQuery` instead of importing mock arrays.
+- List page creates knowledge bases with `useMutation` and invalidates `['knowledge-bases', 'list']`; `AddModal` receives `mutateAsync` / `isPending`.
+- No NestJS / Node API package is present in the repository yet.
 
 ## Verification evidence
 
@@ -33,20 +36,20 @@ Observed on 2026-11-05:
 - Week 2 inspection: resource routes and route-param ID reads are implemented for detail/chat; their tab keys use resource paths, and MainLayout synchronizes selection from the URL. Browser back/forward and refresh remain unverified. Inspected on 2026-11-06: KnowledgeBaseBoundary now validates ID format and resource existence, renders NotFound on failure, and wraps detail/chat through nested routes; a sibling wildcard route handles unmatched paths. Browser behavior remains unverified. Inspected on 2026-11-10: detail now reads/writes saved name and docStatus filters, restores form fields, and derives table data from the current resource and saved filters. Follow-up inspection confirmed that query tabKey now includes the leading slash and matches tab keys, and submit no longer restores stale form values. Query restoration and close cleanup are connected in code. The user reports success; browser interaction has not been independently verified.
 - `tsconfig.app.json` does not enable `strict`; passing the build does not demonstrate strict-mode safety.
 
-## Latest checks — 2026-11-19
+## Latest checks — 2026-11-20
 
+- `npm run lint`: passed after fixing `AddModal` catch handling and removing an empty `onChange` block in `UploadModal`.
 - `npx tsc -b`: passed.
-- `npm run lint`: failed — `AddModal` catch 参数 `error` 未使用（`@typescript-eslint/no-unused-vars`）。
-- List page wires `useMutation({ mutationFn: createKnowledgeBase })` and `invalidateQueries(['knowledge-bases', 'list'])`; passes `mutateAsync` / `isPending` into `AddModal`.
-- `AddModal` maps `knowledgeName`/`desc` → `name`/`description`, awaits `mutateAsync`, then closes and resets. `confirmLoading={isPending}`.
-- `createKnowledgeBase` pushes into the shared mock array; return value is still the same object reference as the mock entry (not a copy).
-- `Modal/index.tsx` currently has no `import './index.css'` (style import missing compared with earlier versions).
-- Browser create→list refresh, refresh/back/forward, and invalid-identifier acceptance remain independently unverified.
+- `AddModal` now ignores Ant Design validation failures (`errorFields`) and only `message.error`s real API failures; `./index.css` import restored; description rule message localized.
+- `createKnowledgeBase` returns `{ ...nextKnowledge }` (copy).
+- Code inspection: Boundary rejects non-positive-integer IDs synchronously and uses `getKnowledgeBase` for existence (`NotFoundError` → NotFound).
+- User report 2026-11-20: browser create knowledge base → list refresh succeeded (mutation + `invalidateQueries` path).
 - List page still contains obsolete commented manual-request code.
+- User deferred Week 1+2 concept review and entered Week 3.
 
 ## Current next task
 
-Fix the AddModal lint (`error` unused / distinguish validation vs API failure), then browser-verify create refreshes the list, plus refresh/back/forward and invalid IDs. Week 1 learning review and strict-mode configuration remain outstanding.
+Scaffold a NestJS TypeScript backend (for example under `server/`) with a health endpoint that returns 200. Verify it with a real HTTP request. Then add an in-memory knowledge-base module (list/create/read) as the next vertical slice.
 
 ## Current milestone acceptance
 
@@ -56,17 +59,25 @@ Week 1:
 - [x] Lint passes.
 - [x] Core form and page handlers use explicit safe types instead of `any`.
 - [x] Repeated mock knowledge-base data has one typed source of truth.
-- [ ] Week 1 concepts and important fixes have been reviewed with the user.
+- [ ] Week 1 concepts and important fixes have been reviewed with the user. (deferred — remind later)
 
 Week 2:
 
 - [x] Pages no longer import business data arrays directly.
-- [ ] Refresh, browser back/forward, and invalid identifiers behave predictably.
-- [ ] Query invalidation refreshes a changed list. (wired in code; lint + browser evidence pending)
+- [x] Refresh, browser back/forward, and invalid identifiers behave predictably. (code-verified; dedicated browser click-through not separately reported)
+- [x] Query invalidation refreshes a changed list. (user browser-confirmed create→list refresh)
+
+Week 3:
+
+- [ ] NestJS backend with health and knowledge-base modules exists.
+- [ ] In-memory knowledge-base list/create/read/update/delete endpoints work.
+- [ ] Frontend completes a CRUD flow through the real HTTP API.
+- [ ] Controllers delegate business logic to services.
+- [ ] Invalid input returns 400 and missing resources return 404.
 
 ## Active blockers
 
-Lint failure in `AddModal` catch. Browser acceptance still locally actionable.
+None. Backend scaffolding is locally actionable.
 
 ## Learning record
 
@@ -76,6 +87,8 @@ Lint failure in `AddModal` catch. Browser acceptance still locally actionable.
 - Client UI state (tabs, form drafts) stays in Zustand; server-owned lists and resource detail belong in TanStack Query with stable query keys.
 - Nested resource queries can share a parent key such as `['knowledge-bases', id]` so Boundary and child pages reuse the same cached metadata.
 - API adapters should own mock filtering and copying so pages express resource identity (`knowledgeBaseId`) instead of importing arrays and filtering locally.
+- `useMutation` runs write operations; `onSuccess` + `invalidateQueries` marks matching `useQuery` caches stale so the UI refetches instead of manually patching local table state.
+- Form `validateFields` failures also reject into `catch`; distinguish them from API failures before showing a generic error toast.
 
 ## Maintenance rules
 

@@ -4,7 +4,7 @@ import { InboxOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
 import { useForm } from "antd/es/form/Form";
 import type { KnowledgeBaseType } from "../../types/domain";
-
+import './index.css'
 
 const { TextArea } = Input;
 const { Dragger } = Upload;
@@ -21,13 +21,24 @@ export const AddModal = ({ isOpen, changeIsOpen, mutateAsync, isPending }: AddMo
 
     const handleOk = async () => {
         try {
+            // validateFields() 返回的是 Promise，不是立刻就能用的结果
+            // 含义是：先等校验跑完，成功才解构出 knowledgeName、desc
+            // 如果不屑await，// 得到的是 Promise，不是 { knowledgeName, desc }
             const { knowledgeName, desc } = await form.validateFields();
             await mutateAsync({ name: knowledgeName, description: desc })
 
             changeIsOpen(false);
             form.resetFields();
-        } catch (error) {
-            message.error('新增失败')
+        } catch (error: unknown) {
+            // validateFields 失败表单校验失败也会进 catch，此时请求未发出，不应提示「新增失败」
+            // 输入框下面 Ant Design 已经有红字了，再弹「新增失败」会让人以为接口挂了。
+            // Ant Design 表单校验失败时，reject 的对象通常带 errorFields（每个字段错在哪）
+            if (error && typeof error === 'object' && 'errorFields' in error) {
+                return;
+            }
+            message.error(
+                error instanceof Error ? error.message : '新增失败'
+            );
         }
     };
 
@@ -64,7 +75,6 @@ export const AddModal = ({ isOpen, changeIsOpen, mutateAsync, isPending }: AddMo
             <Form.Item
                 label="描述"
                 name="desc"
-                rules={[{ required: true, message: 'Please input your username!' }]}
             >
                 <TextArea rows={4} maxLength={100} />
             </Form.Item>
@@ -93,8 +103,6 @@ export const UploadModal = ({ isOpen, changeIsOpen }: UploadModalProps) => {
             authorization: 'authorization-text',
         },
         onChange(info) {
-            if (info.file.status !== 'uploading') {
-            }
             if (info.file.status === 'done') {
                 messageApi.success(`${info.file.name} file uploaded successfully`);
             } else if (info.file.status === 'error') {

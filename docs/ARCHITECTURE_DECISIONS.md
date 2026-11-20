@@ -30,12 +30,13 @@ Server data needs caching, invalidation, loading, failure, and refetch behavior.
 
 ## ADR-003 — Use a structured Node.js backend
 
-- Status: Planned
+- Status: Accepted
 - Date: 2026-11-01
+- Accepted in practice: 2026-11-20 (Week 3 start)
 
 ### Decision
 
-Build the initial API with Node.js, TypeScript, and NestJS. Keep controllers responsible for transport, services responsible for application behavior, and persistence behind repository or data-access boundaries.
+Build the initial API with Node.js, TypeScript, and NestJS. Keep controllers responsible for transport, services responsible for application behavior, and persistence behind repository or data-access boundaries. Place the API in a sibling package (for example `server/`) rather than mixing it into the Vite frontend root.
 
 ### Rationale
 

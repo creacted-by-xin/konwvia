@@ -6,7 +6,8 @@ interface CreateKnowledgeBaseInput {
     description: string
 }
 
-// 创建数据库
+const API_BASE = 'http://localhost:3000';
+
 export async function createKnowledgeBase(input: CreateKnowledgeBaseInput): Promise<KnowledgeBaseType> {
     const { name, description = '' } = input;
     await new Promise(resolve => setTimeout(resolve, 1000));
