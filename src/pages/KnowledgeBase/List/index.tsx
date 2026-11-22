@@ -155,12 +155,20 @@ function KnowledgeBaseList() {
             render: (_, record) => (
                 <Space size="medium">
                     <a onClick={() => onClickEntry(record)}>进入</a>
-                    <a>编辑</a>
-                    <a>删除</a>
+                    <a onClick={onClickUpdate}>编辑</a>
+                    <a onClick={onClickDelete}>删除</a>
                 </Space>
             ),
         },
     ];
+
+    function onClickUpdate() {
+
+    };
+
+    function onClickDelete() {
+        
+    }
 
     function onClickEntry(record: KnowledgeBaseType) {
         const path = `/knowledge-bases/${record.id}`;
