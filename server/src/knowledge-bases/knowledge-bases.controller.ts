@@ -1,5 +1,8 @@
 import { Body, Controller, Get, Post, Param, Patch, Delete } from '@nestjs/common';
 import { KnowledgeBasesService } from './knowledge-bases.service.js';
+import { z } from 'zod';
+import { createKnowledgeBaseSchema, updateKnowledgeBaseSchema } from './dto/create-knowledge-base.dto.js';
+import type { createKnowledgeBaseDto, updateKnowledgeBaseDto } from './dto/create-knowledge-base.dto.js';
 
 @Controller('knowledge-bases')
 export class KnowledgeBasesController {
@@ -11,26 +14,27 @@ export class KnowledgeBasesController {
     }
 
     @Post()
-    create(@Body() body: {name: string, description: string}) {
+    create(@Body({schema: createKnowledgeBaseSchema}) body: createKnowledgeBaseDto) {
         return this.knowledgeBasesService.create(body) ;
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string ) {
-        return this.knowledgeBasesService.findOne(Number(id)) ;
+    // schema 通过后 id 已经是 number，类型可写成 id: number，并去掉 Number(id)
+    findOne(@Param('id', {schema: z.coerce.number().int().positive()}) id: number ) {
+        return this.knowledgeBasesService.findOne(id) ;
     }
 
     @Patch(':id')
     update(
-        @Param('id') id: string,
-        @Body() body: {name?: string, description?: string}
+        @Param('id', {schema: z.coerce.number().int().positive()}) id: number,
+        @Body({schema: updateKnowledgeBaseSchema}) body: updateKnowledgeBaseDto
     ) {
-        return this.knowledgeBasesService.update(Number(id), body) ;
+        return this.knowledgeBasesService.update(id, body) ;
     };
 
 
     @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.knowledgeBasesService.remove(Number(id)) ;
+    remove(@Param('id', {schema: z.coerce.number().int().positive()}) id: number) {
+        return this.knowledgeBasesService.remove(id) ;
     }
 }

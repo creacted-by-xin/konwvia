@@ -46,10 +46,18 @@ export async function createKnowledgeBase(input: CreateKnowledgeBaseInput): Prom
   })
 }
 
+// 更新
 export async function updateKnowledgeBase(id: string, input: {name?: string, description?: string}): Promise<KnowledgeBaseType> {
     return request(`/knowledge-bases/${id}`, {
-    method: 'POST',
+    method: 'PATCH',
     body: JSON.stringify(input),
+  })
+};
+
+// 删除
+export async function removeKnowledgeBase(id: string): Promise<KnowledgeBaseType> {
+    return request(`/knowledge-bases/${id}`, {
+    method: 'DELETE',
   })
 }
 

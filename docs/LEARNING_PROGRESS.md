@@ -1,28 +1,28 @@
 # Knowvia learning and implementation progress
 
-Last observed: 2026-11-20
+Last observed: 2026-11-25
 
 ## Current position
 
 - Roadmap phase: Phase 2 — HTTP and backend foundations.
-- Current milestone: Week 3 — Node.js, HTTP, and NestJS.
-- Status: Entering Week 3 by user request. No backend package exists yet; first slice is scaffold NestJS with a health endpoint.
-- Deferred reminder: User asked to postpone Week 1+2 learning review; **remind them to review before or at the start of the next milestone after Week 3 work is underway / when they next ask for status or next phase**.
+- Current milestone: Week 4 — API contracts.
+- Status: Entering Week 4 by user request after Week 3 acceptance. First focus: request DTOs + consistent validation (query/body) and stable error contract; then pagination/search/sort; then OpenAPI docs.
+- Deferred reminder: Week 1+2 concept review postponed to **this weekend** (user request 2026-11-25).
 
 ## Observed implementation
 
 - The frontend uses React, TypeScript, Vite, Ant Design, React Router, and Zustand.
 - Login, knowledge-base list, knowledge-base detail, upload modal, tab navigation, and chat layout prototypes exist.
 - Protected routes currently use a mock token stored in `localStorage`; there is no real backend authentication yet.
-- Knowledge-base and document content still comes from local mock data, but only through typed API adapters under `src/api`.
+- Knowledge-base list/create/detail adapters target `http://localhost:3000`; documents still use mock adapters.
 - The upload modal posts to a mock external endpoint; document parsing and persistence do not exist yet.
 - Route-level lazy loading is implemented; lazy page exports live in `src/router/LazyPages.tsx`.
 - Repository-level roadmap, progress, and architecture-decision documents are now established and routed through `AGENTS.md`.
 - TanStack Query is installed and QueryClientProvider is connected.
-- Typed adapters exist for `ListKnowledgeBases`, `getKnowledgeBase`, `listDocuments`, and `createKnowledgeBase`.
-- List, detail, boundary, and chat pages load knowledge-base or document data through `useQuery` instead of importing mock arrays.
-- List page creates knowledge bases with `useMutation` and invalidates `['knowledge-bases', 'list']`; `AddModal` receives `mutateAsync` / `isPending`.
-- No NestJS / Node API package is present in the repository yet.
+- Typed adapters exist for `ListKnowledgeBases`, `getKnowledgeBase`, and `createKnowledgeBase` (HTTP). `updateKnowledgeBase` exists but currently uses `POST` instead of `PATCH` and is unused by pages. No delete adapter yet.
+- List page creates knowledge bases with `useMutation` and invalidates `['knowledge-bases', 'list']`.
+- Nest backend lives under `server/` (ESM): `GET /health`, knowledge-bases module with list/create/read/update/delete in memory. Controllers delegate to services. Missing id → `NotFoundException` (404). Empty-name → 400 not implemented yet.
+- `server/src/main.ts` enables CORS for `http://localhost:5173`.
 
 ## Verification evidence
 
@@ -47,9 +47,23 @@ Observed on 2026-11-05:
 - List page still contains obsolete commented manual-request code.
 - User deferred Week 1+2 concept review and entered Week 3.
 
+## Latest checks — 2026-11-24
+
+- Code inspection: `server` knowledge-bases Service/Controller implement in-memory CRUD; `NotFoundException` on missing ids.
+- Code inspection: frontend `request` helper + list/create/get hit real API; CORS enabled in `main.ts`.
+- `updateKnowledgeBase` still sends `POST` (should be `PATCH`); unused by UI. Delete adapter not present.
+- End-to-end browser CRUD through real API and empty-input 400 not yet verified in this check.
+
+## Latest checks — 2026-11-25
+
+- Frontend adapters: `PATCH` update and `DELETE` remove present in `src/api/knowledgeBases.ts`.
+- User curl: empty-name `POST /knowledge-bases` returns `400` + `Bad Request`.
+- Code inspection: `create` uses `BadRequestException` after trim; prefer `name?.trim() ?? ''` if `name` may be missing.
+- User browser confirm 2026-11-25: list+create against Nest; Network showed 201 (POST create), 200 (GET list refetch), 204 CORS preflight.
+
 ## Current next task
 
-Scaffold a NestJS TypeScript backend (for example under `server/`) with a health endpoint that returns 200. Verify it with a real HTTP request. Then add an in-memory knowledge-base module (list/create/read) as the next vertical slice.
+Week 4 slice 1: introduce validated create/update (and later list-query) DTOs so invalid body/query consistently return 400; define a stable error shape the frontend can rely on (code/message), beyond free-form strings. CORS already done in Week 3 — revisit only if docs/config need tightening.
 
 ## Current milestone acceptance
 
@@ -59,25 +73,32 @@ Week 1:
 - [x] Lint passes.
 - [x] Core form and page handlers use explicit safe types instead of `any`.
 - [x] Repeated mock knowledge-base data has one typed source of truth.
-- [ ] Week 1 concepts and important fixes have been reviewed with the user. (deferred — remind later)
+- [ ] Week 1 concepts and important fixes have been reviewed with the user. (deferred to this weekend)
 
 Week 2:
 
 - [x] Pages no longer import business data arrays directly.
 - [x] Refresh, browser back/forward, and invalid identifiers behave predictably. (code-verified; dedicated browser click-through not separately reported)
 - [x] Query invalidation refreshes a changed list. (user browser-confirmed create→list refresh)
+- [ ] Week 2 concepts reviewed with the user. (deferred to this weekend)
 
 Week 3:
 
-- [ ] NestJS backend with health and knowledge-base modules exists.
-- [ ] In-memory knowledge-base list/create/read/update/delete endpoints work.
-- [ ] Frontend completes a CRUD flow through the real HTTP API.
-- [ ] Controllers delegate business logic to services.
-- [ ] Invalid input returns 400 and missing resources return 404.
+- [x] NestJS backend with health and knowledge-base modules exists. (code-inspected)
+- [x] In-memory knowledge-base list/create/read/update/delete endpoints work. (code-inspected; user-reported route checks)
+- [x] Frontend completes a CRUD flow through the real HTTP API. (user browser list+create 2026-11-25; adapters include update/delete)
+- [x] Controllers delegate business logic to services. (code-inspected)
+- [x] Invalid input returns 400 and missing resources return 404. (404 code-inspected; 400 user curl-confirmed 2026-11-25)
+
+Week 4:
+
+- [ ] Invalid query values are rejected consistently.
+- [ ] The frontend renders stable error codes without parsing arbitrary strings.
+- [ ] Every implemented endpoint is callable from the generated API documentation.
 
 ## Active blockers
 
-None. Backend scaffolding is locally actionable.
+None. Week 4 work is locally actionable.
 
 ## Learning record
 
@@ -89,6 +110,9 @@ None. Backend scaffolding is locally actionable.
 - API adapters should own mock filtering and copying so pages express resource identity (`knowledgeBaseId`) instead of importing arrays and filtering locally.
 - `useMutation` runs write operations; `onSuccess` + `invalidateQueries` marks matching `useQuery` caches stale so the UI refetches instead of manually patching local table state.
 - Form `validateFields` failures also reject into `catch`; distinguish them from API failures before showing a generic error toast.
+- Nest: Controller owns HTTP; Service owns business rules; `findIndex` returns `-1` when missing; array index ≠ business `id`.
+- Browser CORS failures appear in the browser Network/Console; Nest often still handled the request or never saw a blocked response as an app error.
+- Shared frontend `request` helper centralizes base URL, JSON headers, and mapping 404 → `NotFoundError`.
 
 ## Maintenance rules
 
