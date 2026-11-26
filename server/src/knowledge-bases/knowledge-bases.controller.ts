@@ -1,16 +1,16 @@
-import { Body, Controller, Get, Post, Param, Patch, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, Patch, Delete, Query } from '@nestjs/common';
 import { KnowledgeBasesService } from './knowledge-bases.service.js';
 import { z } from 'zod';
-import { createKnowledgeBaseSchema, updateKnowledgeBaseSchema } from './dto/create-knowledge-base.dto.js';
-import type { createKnowledgeBaseDto, updateKnowledgeBaseDto } from './dto/create-knowledge-base.dto.js';
+import { createKnowledgeBaseSchema, updateKnowledgeBaseSchema, listKnowledgeBasesQuerySchema } from './dto/create-knowledge-base.dto.js';
+import type { createKnowledgeBaseDto, updateKnowledgeBaseDto, listKnowledgeBasesQueryDto } from './dto/create-knowledge-base.dto.js';
 
 @Controller('knowledge-bases')
 export class KnowledgeBasesController {
     constructor(private readonly knowledgeBasesService: KnowledgeBasesService) {}
 
     @Get()
-    findAll() {
-        return this.knowledgeBasesService.findAll()
+    findAll(@Query({schema: listKnowledgeBasesQuerySchema}) query: listKnowledgeBasesQueryDto) {
+        return this.knowledgeBasesService.findAll(query)
     }
 
     @Post()

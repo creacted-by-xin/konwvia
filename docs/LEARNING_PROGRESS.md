@@ -1,12 +1,12 @@
 # Knowvia learning and implementation progress
 
-Last observed: 2026-11-25
+Last observed: 2026-11-26
 
 ## Current position
 
 - Roadmap phase: Phase 2 — HTTP and backend foundations.
 - Current milestone: Week 4 — API contracts.
-- Status: Entering Week 4 by user request after Week 3 acceptance. First focus: request DTOs + consistent validation (query/body) and stable error contract; then pagination/search/sort; then OpenAPI docs.
+- Status: Slice 1 (Zod DTOs + stable error codes) largely done; entering slice 2 — list pagination / search / sort. OpenAPI remains after that.
 - Deferred reminder: Week 1+2 concept review postponed to **this weekend** (user request 2026-11-25).
 
 ## Observed implementation
@@ -61,9 +61,16 @@ Observed on 2026-11-05:
 - Code inspection: `create` uses `BadRequestException` after trim; prefer `name?.trim() ?? ''` if `name` may be missing.
 - User browser confirm 2026-11-25: list+create against Nest; Network showed 201 (POST create), 200 (GET list refetch), 204 CORS preflight.
 
+## Latest checks — 2026-11-26
+
+- Code inspection: Zod schemas for create/update; `StandardSchemaValidationPipe` + `exceptionFactory` → `VALIDATION_ERROR`; Param id uses `z.coerce.number().int().positive()`.
+- Curl: `GET /knowledge-bases/abc` → 400 `{ code: VALIDATION_ERROR, ... }`; `GET /knowledge-bases/99999` → 404 `{ code: KB_NOT_FOUND, message: ... }`.
+- Frontend `request` attaches `error.code` and maps 404 / `KB_NOT_FOUND` → `NotFoundError`. Minor: else-branch should use `body?.message` when `body` may be null.
+- Code inspection 2026-11-26: list adapter sends `page`/`pageSize`/`q`; list page query key includes them; table pagination uses `data.total`. Browser click-through not done. `onFinish` still calls `refetch()` on the previous query key. Column sorters still sort only the current page.
+
 ## Current next task
 
-Week 4 slice 1: introduce validated create/update (and later list-query) DTOs so invalid body/query consistently return 400; define a stable error shape the frontend can rely on (code/message), beyond free-form strings. CORS already done in Week 3 — revisit only if docs/config need tightening.
+Week 4 slice 3: generate an OpenAPI document and expose interactive docs so each implemented endpoint can be called from the docs. Optionally drop the extra `refetch()` after search.
 
 ## Current milestone acceptance
 

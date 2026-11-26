@@ -6,59 +6,86 @@ interface CreateKnowledgeBaseInput {
     description: string
 }
 
+interface knowledgeBaseListResult {
+    items: KnowledgeBaseType[],
+    total: number,
+    page: number,
+    pageSize: number
+}
+
 const API_BASE = 'http://localhost:3000';
 
 // 创建一个异步请求
-async function request<T>(path:string, init: RequestInit={}) :Promise<T>{
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     //若断网/CORS，这里直接抛，后面都不跑
- const response = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...init.headers,
-    },
-  });
+    const response = await fetch(`${API_BASE}${path}`, {
+        ...init,
+        headers: {
+            'Content-Type': 'application/json',
+            ...init.headers,
+        },
+    });
 
-//只有请求已经到达服务器、且状态码不是 2xx 时，你才手动 throw
-  if (!response.ok) {
-    // Nest 出错时常返回 { message: '...' } 或 { message: [...] }
-    const body = await response.json().catch(() => null);
-    // body?.message。body 可能是 null，Nest 有时 message 是字符串，有时是字符串数组（校验多个字段时）。
-    // 只有 message 是 null/undefined 时才用兜底文案。
-    const message = Array.isArray(body?.message)
-      ? body.message.join('；')
-      : body?.message ?? '知识库服务请求失败';
-    //   变成前端能 catch 的错误
-    const error = new Error(message);
-    if (response.status === 404) error.name = 'NotFoundError'; // Boundary 靠这个识别
-    throw error;
-  }
+    //response.ok 是浏览器 Fetch API 里 Response 对象上的一个布尔值。
+    // 含义：这次 HTTP 响应的状态码是否在 200–299（成功）之间。
+    if (!response.ok) {
+        // response.json()把响应体当 JSON 解析，返回 Promise
+        // .catch(() => null)解析失败时不要让整段 request 崩掉，改成得到 null
+        const body = await response.json().catch(() => null);
 
-//   把成功响应体解析成对象/数组。
-  return response.json() as Promise<T>;
+        // 校验管道默认（未写 exceptionFactory 时）message 可能是数组（校验多个字段时）。
+        // 1）文案：数组就拼起来；否则用字符串 message；再没有就兜底
+        const message = Array.isArray(body?.message)
+            ? body.message.join(';')
+            : body?.message ?? '知识库服务请求失败';
+
+        // 2）稳定 code：必须是 string 才认
+        const code = typeof body?.code === 'string' ? body.code : undefined;
+
+        // 3）Error 上挂 code（TS 用交叉类型允许这个字段）
+        // 创建一个标准的 Error 实例,告诉 TS——变量 error 既是 Error，又可以有 error.code
+        // 合在一起的效果
+        // message = '知识库ID99999不存在'
+        // code = 'KB_NOT_FOUND'
+        const error = new Error(message) as Error & { code?: string };
+        if (code) {
+            error.code = code;
+        }
+
+        // 4）NotFound：HTTP 404 或业务 code 都算
+        // 改错误类别标记，给现有 Boundary 用。
+        if (response.status === 404 || code === 'KB_NOT_FOUND') {
+            error.name = 'NotFoundError';
+        }
+
+        throw error;
+    }
+
+    //   把成功响应体解析成对象/数组。
+    return response.json() as Promise<T>;
 };
 
 
 export async function createKnowledgeBase(input: CreateKnowledgeBaseInput): Promise<KnowledgeBaseType> {
     return request('/knowledge-bases', {
-    method: 'POST',
-    body: JSON.stringify(input),
-  })
+        method: 'POST',
+        body: JSON.stringify(input),
+    })
 }
 
 // 更新
-export async function updateKnowledgeBase(id: string, input: {name?: string, description?: string}): Promise<KnowledgeBaseType> {
+export async function updateKnowledgeBase(id: string, input: { name?: string, description?: string }): Promise<KnowledgeBaseType> {
     return request(`/knowledge-bases/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify(input),
-  })
+        method: 'PATCH',
+        body: JSON.stringify(input),
+    })
 };
 
 // 删除
 export async function removeKnowledgeBase(id: string): Promise<KnowledgeBaseType> {
     return request(`/knowledge-bases/${id}`, {
-    method: 'DELETE',
-  })
+        method: 'DELETE',
+    })
 }
 
 // // 模拟等待，并处理取消（定义一个“可以取消的等待函数”）
@@ -100,8 +127,14 @@ export async function removeKnowledgeBase(id: string): Promise<KnowledgeBaseType
 
 
 // 查询知识库函数，返回全部知识库
-export async function ListKnowledgeBases(signal: AbortSignal): Promise<KnowledgeBaseType[]> {
-    return request('/knowledge-bases', { signal });
+export async function ListKnowledgeBases(signal: AbortSignal, query: { page: number, pageSize: number, q?: string }): Promise<knowledgeBaseListResult> {
+    const params = new URLSearchParams({
+        page: String(query.page),
+        pageSize: String(query.pageSize),
+    })
+    if(query.q) params.set('q', query.q);
+
+    return request(`/knowledge-bases?${params.toString()}`, { signal });
 }
 
 // —— 单条详情，按 id 取某一个知识库
@@ -109,6 +142,6 @@ export async function getKnowledgeBase(
     id: number,
     signal: AbortSignal
 ): Promise<KnowledgeBaseType> {
-    return request(`/knowledge-bases/${id}`, {signal})
+    return request(`/knowledge-bases/${id}`, { signal })
 }
 

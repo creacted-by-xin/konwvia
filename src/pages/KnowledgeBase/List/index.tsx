@@ -34,7 +34,8 @@ function KnowledgeBaseList() {
     // 新建成功后，列表那份缓存还是旧的。列表自己不知道「有人刚写过数据」。
     // 所以要在 mutation 成功后，对管家说：['knowledge-bases', 'list'] 这份过期了，请重新拉。」
     const queryClient = useQueryClient();
-
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     // 保存是否正在加载。初始是 true，所以页面首次显示时可以展示加载动画。
     // const [loading, setLoading] = useState<boolean>(true);
@@ -81,14 +82,15 @@ function KnowledgeBaseList() {
 
     // 	isFetching当前是否正在请求，包括重新获取
     // refetch	主动重新获取当前查询
-    const { data: tableData = [], isFetching, error, refetch } = useQuery({
+    const { data, isFetching, error, refetch } = useQuery({
         // 数据的缓存标识
-        queryKey: ['knowledge-bases', 'list'],
+        queryKey: ['knowledge-bases', 'list', { page, pageSize, q: savedName }],
         // TanStack Query 调用 queryFn 时，传入的是一个包含多项信息的对象，`signal` 只是其中一个属性。
-        queryFn: ({ signal }) => ListKnowledgeBases(signal),
+        queryFn: ({ signal }) => ListKnowledgeBases(signal, { page, pageSize, q: savedName || undefined }),
         retry: false,
         refetchOnWindowFocus: false
     });
+    const tableData = data?.items ?? [];
 
 
     const { mutateAsync, isPending } = useMutation({
@@ -101,9 +103,9 @@ function KnowledgeBaseList() {
         }
     })
 
-    const filteredData = tableData.filter(item =>
-        item.name.includes(savedName)
-    );
+    // const filteredData = tableData?.filter(item =>
+    //     item.name.includes(savedName)
+    // );
 
     useEffect(() => {
         form.setFieldsValue({
@@ -111,7 +113,17 @@ function KnowledgeBaseList() {
         })
     }, [savedName, form])
 
+
+    useEffect(() => {
+        setPage(1);
+    }, [savedName]);
+
     const columns: ColumnsType<KnowledgeBaseType> = [
+        {
+            title: '知识库ID',
+            dataIndex: 'id',
+            key: 'id',
+        },
         {
             title: '知识库名称',
             dataIndex: 'name',
@@ -167,7 +179,7 @@ function KnowledgeBaseList() {
     };
 
     function onClickDelete() {
-        
+
     }
 
     function onClickEntry(record: KnowledgeBaseType) {
@@ -231,7 +243,7 @@ function KnowledgeBaseList() {
 
                 </div>
                 <Button type="primary" onClick={() => setIsOpen(true)}>新增</Button>
-                <AddModal isOpen={isOpen} changeIsOpen={changeIsOpen} mutateAsync={mutateAsync} isPending={isPending}/>
+                <AddModal isOpen={isOpen} changeIsOpen={changeIsOpen} mutateAsync={mutateAsync} isPending={isPending} />
             </div>
 
             <div>
@@ -252,7 +264,20 @@ function KnowledgeBaseList() {
                         }
                     />
                 )}
-                <Table rowKey="id" loading={isFetching} columns={columns} dataSource={filteredData} showSorterTooltip={false}
+                <Table rowKey="id" loading={isFetching} columns={columns} dataSource={tableData}
+                    pagination={{
+                        current: page,
+                        pageSize,
+                        total: data?.total ?? 0,
+                        showSizeChanger: true,
+                        // pageSizeOptions: ['10', '20', '50', '100'],
+                        locale: { items_per_page: '条/页' },
+                        showTotal: (total) => `共 ${total} 条`,
+                        onChange: (nextPage, nextPageSize) => {
+                            setPage(nextPage);
+                            setPageSize(nextPageSize);
+                        },
+                    }}
                 ></Table >
             </div>
         </div>

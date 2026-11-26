@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import type { listKnowledgeBasesQueryDto } from './dto/create-knowledge-base.dto.js';
 
 // 告诉 Nest：这个类可以被「注入」到 Controller 里
 @Injectable()
@@ -26,25 +27,57 @@ export class KnowledgeBasesService {
     ];
 
     // 查询所有
-    findAll() {
+    findAll(query: listKnowledgeBasesQueryDto) {
+        const { page, pageSize, q, sortBy, sortOrder } = query;
+        const keyWord = q?.toLowerCase();
+
+        // 过滤数据
+        const filtered = keyWord ? 
+        this.items.filter(item => {
+            const name = item.name.toLowerCase();
+             const description = item.description.toLowerCase();
+             return name.includes(keyWord) ||  description.includes(keyWord)
+        })
+        : this.items;
+
+        //排序,返回 > 0：a 排在 b 后面
+        const sorted = [...filtered].sort((a, b) => {
+            // 取出要比的字段
+            const left = a[sortBy];
+            const right = b[sortBy];
+
+            // 升序比较结果,localeCompare 本身就会返回负数 / 0 / 正数，正好给 sort 用。
+            const cmp = String(left).localeCompare(String(right))
+
+            return sortOrder === 'asc' ? cmp : -cmp;
+        })
+
+        // 总数
+        const total = sorted.length;
+
+        // 当前页数据
+        const start = (page -1) * pageSize;
+        const items = sorted.slice(start, start + pageSize)
+            
+
         // 把数组交给调用方（Controller）
-        return this.items
+        return { items, total, page, pageSize };
     }
 
     // 新增一条
-    create(data: {name: string, description?: string}) {
+    create(data: { name: string, description?: string }) {
         const { name, description } = data;
         const now = new Date().toISOString();
         const nextId = this.items.length === 0 ? 1 : Math.max(...this.items.map(item => item.id)) + 1;
-        const nextname = name.trim()??'';
-        if(!nextname) {
+        const nextname = name.trim() ?? '';
+        if (!nextname) {
             throw new BadRequestException('数据库名称不能未空')
         }
 
         const created = {
             id: nextId,
             name: nextname,
-            description: description??'',
+            description: description ?? '',
             documentCount: 0,
             createdBy: 'users',
             createdAt: now,
@@ -58,23 +91,29 @@ export class KnowledgeBasesService {
 
     // 查询一条
     findOne(id: number) {
-        const found = this.items.find(item=> item.id === id)
-        if(!found) {
-            throw new NotFoundException(`知识库ID${id}不存在`)
+        const found = this.items.find(item => item.id === id)
+        if (!found) {
+             throw new NotFoundException({
+                code: 'KB_NOT_FOUND',
+                message: `知识库ID${id}不存在`
+            })
         }
 
         return found;
     }
 
     // 编辑
-    update(id: number, data: {name?: string, description?: string}) {
-        const  {name, description} = data;
+    update(id: number, data: { name?: string, description?: string }) {
+        const { name, description } = data;
 
         // 找到该数据的位置，没找到返回-1
-        const index = this.items.findIndex(item=> item.id === id);
+        const index = this.items.findIndex(item => item.id === id);
 
-        if(index < 0) {
-            throw new NotFoundException(`知识库ID${id}不存在`)
+        if (index < 0) {
+            throw new NotFoundException({
+                code: 'KB_NOT_FOUND',
+                message: `知识库ID${id}不存在`
+            })
         };
 
         //id为0时就true了
@@ -85,10 +124,10 @@ export class KnowledgeBasesService {
 
         const foundData = this.items[index];
 
-        this.items[index]= {
+        this.items[index] = {
             ...foundData,
-            ...(name !== undefined ? {name} : {}),
-            ...(description !== undefined ? {description} : {}),
+            ...(name !== undefined ? { name } : {}),
+            ...(description !== undefined ? { description } : {}),
             updatedAt: new Date().toISOString()
         };
 
@@ -96,11 +135,14 @@ export class KnowledgeBasesService {
     }
 
     // 删除
-    remove( id: number ) {
-        const index = this.items.findIndex(item=> item.id === id);
+    remove(id: number) {
+        const index = this.items.findIndex(item => item.id === id);
 
-        if(index < 0) {
-            throw new NotFoundException(`知识库ID${id}不存在`)
+        if (index < 0) {
+            throw new NotFoundException({
+                code: 'KB_NOT_FOUND',
+                message: `知识库ID${id}不存在`
+            })
         };
 
         // splice(index, 1) 的返回值是 「被删掉的元素组成的数组」
