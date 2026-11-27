@@ -36,6 +36,8 @@ function KnowledgeBaseList() {
     const queryClient = useQueryClient();
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+    const [sortBy, setSortBy] = useState<'documentCount' | 'createdAt' | 'updatedAt'>('updatedAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
     // 保存是否正在加载。初始是 true，所以页面首次显示时可以展示加载动画。
     // const [loading, setLoading] = useState<boolean>(true);
@@ -84,9 +86,9 @@ function KnowledgeBaseList() {
     // refetch	主动重新获取当前查询
     const { data, isFetching, error, refetch } = useQuery({
         // 数据的缓存标识
-        queryKey: ['knowledge-bases', 'list', { page, pageSize, q: savedName }],
+        queryKey: ['knowledge-bases', 'list', { page, pageSize, q: savedName, sortBy, sortOrder }],
         // TanStack Query 调用 queryFn 时，传入的是一个包含多项信息的对象，`signal` 只是其中一个属性。
-        queryFn: ({ signal }) => ListKnowledgeBases(signal, { page, pageSize, q: savedName || undefined }),
+        queryFn: ({ signal }) => ListKnowledgeBases(signal, { page, pageSize, q: savedName || undefined, sortBy, sortOrder }),
         retry: false,
         refetchOnWindowFocus: false
     });
@@ -122,7 +124,7 @@ function KnowledgeBaseList() {
         {
             title: '知识库ID',
             dataIndex: 'id',
-            key: 'id',
+            key: 'name',
         },
         {
             title: '知识库名称',
@@ -138,9 +140,8 @@ function KnowledgeBaseList() {
             title: '文档数',
             dataIndex: 'documentCount',
             key: 'documentCount',
-            sorter: {
-                compare: (a, b) => a.documentCount - b.documentCount,
-            },
+            sorter: true,
+            sortOrder: sortBy === 'documentCount' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null
         },
         {
             title: '创建人',
@@ -152,14 +153,15 @@ function KnowledgeBaseList() {
             dataIndex: 'createdAt',
             key: 'createdAt',
             // 把一个日期转换成时间戳数字。
-            sorter: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+            sorter: true,
+            sortOrder: sortBy === 'createdAt' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null
         },
         {
             title: '更新时间',
             dataIndex: 'updatedAt',
             key: 'updatedAt',
-            // 把一个日期转换成时间戳数字。
-            sorter: (a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime(),
+            sorter: true,
+            sortOrder: sortBy === 'updatedAt' ? (sortOrder === 'asc' ? 'ascend' : 'descend') : null
         },
         {
             title: '操作',
@@ -167,7 +169,10 @@ function KnowledgeBaseList() {
             render: (_, record) => (
                 <Space size="medium">
                     <a onClick={() => onClickEntry(record)}>进入</a>
-                    <a onClick={onClickUpdate}>编辑</a>
+                    <a onClick={() => {
+                        setIsOpen(true);
+                        onClickUpdate()
+                    }}>编辑</a>
                     <a onClick={onClickDelete}>删除</a>
                 </Space>
             ),
@@ -197,14 +202,16 @@ function KnowledgeBaseList() {
         const keyword = values.name?.trim() ?? '';
         setDetailQuery('home', { name: keyword })
 
-        await refetch();
+        // queryKey 里的关键词变了，TanStack Query 自己会请求。onFinish 和 onReset 里的 await refetch() 删掉即可
+        // await refetch();
     };
 
     async function onReset() {
         form.resetFields();
         setDetailQuery("home", {});
 
-        await refetch();
+        // queryKey 里的关键词变了，TanStack Query 自己会请求。onFinish 和 onReset 里的 await refetch() 删掉即可
+        // await refetch();
     };
 
     function changeIsOpen(isOpen: boolean) {
@@ -273,10 +280,26 @@ function KnowledgeBaseList() {
                         // pageSizeOptions: ['10', '20', '50', '100'],
                         locale: { items_per_page: '条/页' },
                         showTotal: (total) => `共 ${total} 条`,
-                        onChange: (nextPage, nextPageSize) => {
-                            setPage(nextPage);
-                            setPageSize(nextPageSize);
-                        },
+                        // onChange: (nextPage, nextPageSize) => {
+                        //     setPage(nextPage);
+                        //     setPageSize(nextPageSize);
+                        // },
+                    }}
+                    onChange={(pagination, _filters, sorter)=> {
+                        // 只排一列时，sorter 是一个对象，例如 { field: 'createdAt', order: 'descend' }。表格如果允许多列一起排，它会变成数组。
+                        // 你现在只用一列，取数组的第一项是为了两种形状都能读。
+                        const currentSorter = Array.isArray(sorter) ? sorter[0] : sorter;
+                        const field = currentSorter?.field;
+                        const order = currentSorter?.order;
+
+                        const nextSortBy = field === 'documentCount' || 'createdAt' || 'updatedAt' ? field : sortBy;
+                        const nextSortOrder = order === 'ascend' ? 'asc' : order === 'descend' ? 'desc' : sortOrder;
+                        const sortChanged = nextSortBy !== sortBy || nextSortOrder !== sortOrder;
+
+                        setSortBy(nextSortBy)
+                        setSortOrder(nextSortOrder)
+                        setPage(sortChanged ? 1 : (pagination.current ?? 1))
+                        setPageSize(pagination.pageSize ?? pageSize)
                     }}
                 ></Table >
             </div>

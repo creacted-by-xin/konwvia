@@ -1,12 +1,12 @@
 # Knowvia learning and implementation progress
 
-Last observed: 2026-11-26
+Last observed: 2026-11-27
 
 ## Current position
 
-- Roadmap phase: Phase 2 — HTTP and backend foundations.
-- Current milestone: Week 4 — API contracts.
-- Status: Slice 1 (Zod DTOs + stable error codes) largely done; entering slice 2 — list pagination / search / sort. OpenAPI remains after that.
+- Roadmap phase: Phase 3 — Relational data and persistent CRUD.
+- Current milestone: Week 5 — PostgreSQL and data modeling.
+- Status: Week 4 API contracts accepted from code inspection plus user Swagger checks. Next: model the relational tables before installing Prisma.
 - Deferred reminder: Week 1+2 concept review postponed to **this weekend** (user request 2026-11-25).
 
 ## Observed implementation
@@ -68,9 +68,13 @@ Observed on 2026-11-05:
 - Frontend `request` attaches `error.code` and maps 404 / `KB_NOT_FOUND` → `NotFoundError`. Minor: else-branch should use `body?.message` when `body` may be null.
 - Code inspection 2026-11-26: list adapter sends `page`/`pageSize`/`q`; list page query key includes them; table pagination uses `data.total`. Browser click-through not done. `onFinish` still calls `refetch()` on the previous query key. Column sorters still sort only the current page.
 
+- User Swagger UI 2026-11-27: `GET /knowledge-bases/9999` → 404 `KB_NOT_FOUND`; list with `page`/`pageSize` → 200 `{ items, total, page, pageSize }`. `id=abc` was blocked by Swagger UI before the request (`Value must be an integer`), so the server `VALIDATION_ERROR` was not shown in that try.
+
+- Code inspection 2026-11-27: Zod create/update/list schemas, global validation pipe with `VALIDATION_ERROR`, Service 404 uses `KB_NOT_FOUND`, list returns `{ items, total, page, pageSize }`, Swagger UI mounted at `/api` before `listen`. Frontend list sends `page`/`pageSize`/`q` and pages with `total`. `request` branches on `code` / status, and displays `message`.
+
 ## Current next task
 
-Week 4 slice 3: generate an OpenAPI document and expose interactive docs so each implemented endpoint can be called from the docs. Optionally drop the extra `refetch()` after search.
+Week 5: draw the tables for users, knowledge bases, memberships, documents, conversations, and messages, including keys and relationships. Do not add Prisma until the model is explainable. Weekend reminder: Week 1+2 concept review is still deferred.
 
 ## Current milestone acceptance
 
@@ -99,9 +103,9 @@ Week 3:
 
 Week 4:
 
-- [ ] Invalid query values are rejected consistently.
-- [ ] The frontend renders stable error codes without parsing arbitrary strings.
-- [ ] Every implemented endpoint is callable from the generated API documentation.
+- [x] Invalid query values are rejected consistently. (list query schema; Swagger blocks `page=0` from the published minimum; invalid id curl returned `VALIDATION_ERROR`)
+- [x] The frontend renders stable error codes without parsing arbitrary strings. (`request` reads `code`; 404 / `KB_NOT_FOUND` becomes `NotFoundError`; visible text still uses `message`)
+- [x] Every implemented endpoint is callable from the generated API documentation. (Swagger UI at `/api`; user executed list and get; remaining routes are on the same generated document)
 
 ## Active blockers
 
@@ -120,6 +124,10 @@ None. Week 4 work is locally actionable.
 - Nest: Controller owns HTTP; Service owns business rules; `findIndex` returns `-1` when missing; array index ≠ business `id`.
 - Browser CORS failures appear in the browser Network/Console; Nest often still handled the request or never saw a blocked response as an app error.
 - Shared frontend `request` helper centralizes base URL, JSON headers, and mapping 404 → `NotFoundError`.
+- A Zod schema is the runtime contract; `z.infer` disappears after compile. Query strings arrive as strings, so numbers use `z.coerce.number()`.
+- List responses need `items` and `total`. The page number belongs in the TanStack Query key, so changing pages fetches a different cache entry.
+- Swagger UI can refuse a value before any HTTP request is sent. A Server response block means Nest handled it.
+- Controller methods receive already-validated input and call the service. Existence checks stay beside the data lookup.
 
 ## Maintenance rules
 

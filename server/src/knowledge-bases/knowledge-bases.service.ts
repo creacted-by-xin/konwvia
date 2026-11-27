@@ -70,9 +70,6 @@ export class KnowledgeBasesService {
         const now = new Date().toISOString();
         const nextId = this.items.length === 0 ? 1 : Math.max(...this.items.map(item => item.id)) + 1;
         const nextname = name.trim() ?? '';
-        if (!nextname) {
-            throw new BadRequestException('数据库名称不能未空')
-        }
 
         const created = {
             id: nextId,

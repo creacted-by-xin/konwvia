@@ -138,6 +138,7 @@ function KnowledgeBaseDetail() {
             key: 'action',
             render: () => (
                 <Space size="medium">
+                    <a>下载</a>
                     <a>删除</a>
                 </Space>
             ),

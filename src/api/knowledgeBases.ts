@@ -65,7 +65,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     return response.json() as Promise<T>;
 };
 
-
+// 新增
 export async function createKnowledgeBase(input: CreateKnowledgeBaseInput): Promise<KnowledgeBaseType> {
     return request('/knowledge-bases', {
         method: 'POST',
@@ -127,12 +127,17 @@ export async function removeKnowledgeBase(id: string): Promise<KnowledgeBaseType
 
 
 // 查询知识库函数，返回全部知识库
-export async function ListKnowledgeBases(signal: AbortSignal, query: { page: number, pageSize: number, q?: string }): Promise<knowledgeBaseListResult> {
+export async function ListKnowledgeBases(signal: AbortSignal,
+    query: { page: number, pageSize: number, q?: string, sortBy: 'documentCount' | 'createdAt' | 'updatedAt' , sortOrder: 'asc' | 'desc'} )
+    : Promise<knowledgeBaseListResult> {
     const params = new URLSearchParams({
         page: String(query.page),
         pageSize: String(query.pageSize),
+        sortBy: query.sortBy,
+        sortOrder:  query.sortOrder
     })
-    if(query.q) params.set('q', query.q);
+    // page、pageSize、sortBy、sortOrder 每次请求都有值，所以直接放进构造函数。q 是可选的：没有搜索词时，URL 里就不该出现这个参数。
+    if (query.q) params.set('q', query.q);
 
     return request(`/knowledge-bases?${params.toString()}`, { signal });
 }
